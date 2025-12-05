@@ -8,9 +8,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,31 +35,9 @@ public class RegisterTests {
     void testNormalRegister() {
         UserRegisterDTO byUsername = new UserRegisterDTO(UserLoginType.USERNAME, "testuser", "password123");
 
-        // User byU = User.builder()
-        // .userId("UUID-0001")
-        // .username("testuser")
-        // .passwordHash("1234")
-        // .build();
-
-        // User byE = User.builder()
-        // .userId("UUID-0002")
-        // .email("1983517529@qq.com")
-        // .passwordHash("1234")
-        // .build();
-
-        // User byP = User.builder()
-        // .userId("UUID-0003")
-        // .phoneNumber("13517529835")
-        // .passwordHash("1234")
-        // .build();
-
         UserRegisterDTO byEmail = new UserRegisterDTO(UserLoginType.EMAIL, "1983517529@qq.com", "password123");
 
         UserRegisterDTO byPhoneNumber = new UserRegisterDTO(UserLoginType.PHONE_NUMBER, "13517529835", "password123");
-
-        // when(userMapper.insertUser(byU)).thenReturn(1);
-        // when(userMapper.insertUser(byE)).thenReturn(1);
-        // when(userMapper.insertUser(byP)).thenReturn(1);
 
         assertDoesNotThrow(() -> userRegisterService.registerUser(byUsername));
 
@@ -81,23 +61,30 @@ public class RegisterTests {
 
     @Test
     void testMissingRegister() {
-        UserRegisterDTO missingLogin = new UserRegisterDTO(UserLoginType.USERNAME, "", "password123");
+        UserRegisterDTO missingLogin = mock(UserRegisterDTO.class, RETURNS_DEEP_STUBS);
 
-        UserRegisterDTO missingPassword = new UserRegisterDTO(UserLoginType.USERNAME, "testuser", "");
+        when(missingLogin.login()).thenReturn("");
+        when(missingLogin.type()).thenReturn(UserLoginType.USERNAME);
 
+        UserRegisterDTO fakeLoginDto = mock(UserRegisterDTO.class, RETURNS_DEEP_STUBS);
+
+        when(fakeLoginDto.type()).thenReturn(UserLoginType.USERNAME);
+        when(fakeLoginDto.login()).thenReturn("testuser");
+        when(fakeLoginDto.password()).thenReturn("");
+        
         BizException ex1 = assertThrows(BizException.class, () -> {
-            userRegisterService.registerUser(missingLogin);
+        userRegisterService.registerUser(missingLogin);
         });
 
         assertTrue(ex1.getMessage().contains("至少"));
 
         BizException ex2 = assertThrows(BizException.class, () -> {
-            userRegisterService.registerUser(missingPassword);
+            userRegisterService.registerUser(fakeLoginDto);
         });
 
         assertTrue(ex2.getMessage().contains("不能为空"));
     }
-    
+
     @Test
     void testDuplicateRegister() {
         UserRegisterDTO dto = new UserRegisterDTO(UserLoginType.USERNAME, "duplicateUser", "password123");
