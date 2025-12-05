@@ -21,8 +21,8 @@ public interface UserMapper {
     })
 
     @Insert("""
-            INSERT INTO t_user (username, password, email, phone_number)
-            VALUES (#{username}, #{password}, #{email}, #{phoneNumber})
+            INSERT INTO t_user (user_id, username, password, email, phone_number)
+            VALUES (#{userId}, #{username}, #{password}, #{email}, #{phoneNumber})
             """)
     @Options(useGeneratedKeys = false)
     int insertUser(User user);
