@@ -17,11 +17,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 
 import com.agri.platform.DTO.UserRegisterDTO;
-import com.agri.platform.entity.User;
-import com.agri.platform.mapper.UserMapper;
+import com.agri.platform.entity.user.User;
 import com.agri.platform.enums.UserLoginType;
 import com.agri.platform.exception.BizException;
-import com.agri.platform.service.UserRegisterService;
+import com.agri.platform.mapper.user.UserMapper;
+import com.agri.platform.service.user.UserRegisterService;
 
 @ExtendWith(MockitoExtension.class)
 public class RegisterTests {
