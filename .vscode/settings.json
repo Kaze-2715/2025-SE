@@ -1,0 +1,6 @@
+{
+    "trae.tab.enableRename": false,
+    "trae.tab.enableAutoImport": false,
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.compile.nullAnalysis.mode": "automatic"
+}
