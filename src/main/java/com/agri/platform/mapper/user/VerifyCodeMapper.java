@@ -18,6 +18,8 @@ public interface VerifyCodeMapper {
         @Results(id = "verifyCodeMap", value = {
                         @Result(property = "bizType", column = "biz_type", javaType = VerifyCode.BizType.class, typeHandler = EnumTypeHandler.class)
         })
+        @Select("SELECT 1")
+        void verifyCodeMap();
 
         @Insert("""
                         INSERT INTO t_verify_code (biz_type, target, code, expire_time)
@@ -34,8 +36,16 @@ public interface VerifyCodeMapper {
         @Select("""
                         SELECT * FROM t_verify_code WHERE biz_type = #{bizType} AND target = #{target} AND used = 0
                         ORDER BY created_time DESC LIMIT 1
-                        """)
-        @ResultMap("verifyCodeMap")
+                """)
+        @Results({
+                @Result(column = "id", property = "id"),
+                @Result(column = "biz_type", property = "bizType", javaType = VerifyCode.BizType.class, typeHandler = EnumTypeHandler.class),
+                @Result(column = "target", property = "target"),
+                @Result(column = "code", property = "code"),
+                @Result(column = "expire_time", property = "expireTime"),
+                @Result(column = "used", property = "used"),
+                @Result(column = "created_time", property = "createdTime")
+        })
         VerifyCode findLatestCode(@Param("bizType") String bizType,
                         @Param("target") String target);
 

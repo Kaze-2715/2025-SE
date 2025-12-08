@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 import java.time.LocalDateTime;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,13 +25,14 @@ import lombok.extern.slf4j.Slf4j;
 public class UserRegisterService {
     private final UserMapper userMapper;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    private final VerifyCodeService verifyCodeService;
 
     public User registerUser(UserRegisterDTO dto) {
         if (dto.login() == null || dto.login().isBlank()) {
-            throw new BizException("用户名、邮箱或手机号至少填一项！");
+            throw new BizException(HttpStatus.BAD_REQUEST,"用户名、邮箱或手机号至少填一项！");
         }
         if (dto.password() == null || dto.password().isBlank()) {
-            throw new BizException("密码不能为空！");
+            throw new BizException(HttpStatus.BAD_REQUEST,"密码不能为空！");
         }
 
         boolean exists = switch (dto.type()) {
@@ -39,7 +41,14 @@ public class UserRegisterService {
             case PHONE_NUMBER -> userMapper.countByPhoneNumber(dto.login()) > 0;
         };
         if (exists) {
-            throw new BizException("用户已存在！");
+            throw new BizException(HttpStatus.BAD_REQUEST, "用户已存在！");
+        }
+        
+        if (dto.type() == UserLoginType.EMAIL) {
+            boolean ok = verifyCodeService.verify(dto.login(), "REGISTER", dto.verifyCode());
+            if (!ok) {
+                throw new BizException(HttpStatus.BAD_REQUEST, "无效的验证码！");
+            }
         }
 
         User user = User.builder()

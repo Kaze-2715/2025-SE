@@ -9,9 +9,11 @@ import com.agri.platform.entity.user.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException.Unauthorized;
 
 import com.agri.platform.exception.BizException;
 import com.agri.platform.mapper.user.UserMapper;
@@ -37,15 +39,16 @@ public class UserLoginService {
             case PHONE_NUMBER -> Optional.ofNullable(userMapper.selectByPhoneNumber(dto.login()).orElse(null));
         };
 
-        User user = optUser.orElseThrow(() -> new BizException("用户不存在！"));
+        User user = optUser.orElseThrow(() -> new BizException(HttpStatus.BAD_REQUEST,"用户不存在！"));
+        log.warn("原始查询结果：{}", optUser);
 
         if (user.getAccountStatus() == User.AccountStatus.FROZEN) {
-            throw new BizException("账户已冻结！");
+            throw new BizException(HttpStatus.FORBIDDEN,"账户已冻结！");
         }
 
         if (!encoder.matches(dto.password(), user.getPasswordHash())) {
             handleLoginFail(user);
-            throw new BizException("密码错误！");
+            throw new BizException(HttpStatus.UNAUTHORIZED,"密码错误！");
         }
 
         user.setLoginFailCount(0);

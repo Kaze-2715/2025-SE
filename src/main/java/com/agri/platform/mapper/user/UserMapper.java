@@ -16,13 +16,25 @@ import com.agri.platform.entity.user.User;
 
 @Mapper
 public interface UserMapper {
-    @Results(id = "userMap", value = {
-            @Result(property = "accountStatus", column = "account_status", javaType = User.AccountStatus.class, typeHandler = EnumTypeHandler.class)
-    })
+//         @Results(id = "userMap", value = {
+//                         @Result(property = "userId", column = "user_id"),
+//                         @Result(property = "username", column = "username"),
+//                         @Result(property = "phoneNumber", column = "phone_number"),
+//                         @Result(property = "email", column = "email"),
+//                         @Result(property = "passwordHash", column = "password_hash"),
+//                         @Result(property = "accountStatus", column = "account_status", javaType = User.AccountStatus.class, typeHandler = org.apache.ibatis.type.EnumTypeHandler.class),
+//                         @Result(property = "registrationTime", column = "registration_time"),
+//                         @Result(property = "lastLoginTime", column = "last_login_time"),
+//                         @Result(property = "lastLoginIP", column = "last_login_ip"),
+//                         @Result(property = "loginFailCount", column = "login_fail_count"),
+//                         @Result(property = "loginLockedUntil", column = "login_locked_until")
+//         })
+//     @Select("SELECT * FROM t_user LIMIT 1")
+//     void userMap();
 
     @Insert("""
-            INSERT INTO t_user (user_id, username, password, email, phone_number)
-            VALUES (#{userId}, #{username}, #{password}, #{email}, #{phoneNumber})
+            INSERT INTO t_user (user_id, username, password_hash, email, phone_number)
+            VALUES (#{userId}, #{username}, #{passwordHash}, #{email}, #{phoneNumber})
             """)
     @Options(useGeneratedKeys = false)
     int insertUser(User user);
@@ -36,16 +48,29 @@ public interface UserMapper {
     @Select("SELECT COUNT(*) FROM t_user WHERE phone_number = #{phoneNumber}")
     int countByPhoneNumber(String phoneNumber);
 
+    // @ResultMap("userMap")
     @Select("SELECT * FROM t_user WHERE username = #{username}")
-    @ResultMap("userMap")
     Optional<User> selectByUsername(String username);
 
+    //     @ResultMap("userMap")
+    @Results(id = "userMap", value = {
+                    @Result(property = "userId", column = "user_id"),
+                    @Result(property = "username", column = "username"),
+                    @Result(property = "phoneNumber", column = "phone_number"),
+                    @Result(property = "email", column = "email"),
+                    @Result(property = "passwordHash", column = "password_hash"),
+                    @Result(property = "accountStatus", column = "account_status", javaType = User.AccountStatus.class, typeHandler = org.apache.ibatis.type.EnumTypeHandler.class),
+                    @Result(property = "registrationTime", column = "registration_time"),
+                    @Result(property = "lastLoginTime", column = "last_login_time"),
+                    @Result(property = "lastLoginIP", column = "last_login_ip"),
+                    @Result(property = "loginFailCount", column = "login_fail_count"),
+                    @Result(property = "loginLockedUntil", column = "login_locked_until")
+    })
     @Select("SELECT * FROM t_user WHERE email = #{email}")
-    @ResultMap("userMap")
     Optional<User> selectByEmail(String email);
 
+    // @ResultMap("userMap")
     @Select("SELECT * FROM t_user WHERE phone_number = #{phoneNumber}")
-    @ResultMap("userMap")
     Optional<User> selectByPhoneNumber(String phoneNumber);
 
     @Update("""

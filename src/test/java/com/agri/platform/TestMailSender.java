@@ -25,6 +25,7 @@ public class TestMailSender {
     @Test
     void sendActiveEmail_shouldFillCorrectly() throws Exception {
         ArgumentCaptor<SimpleMailMessage> messageCaptor = ArgumentCaptor.forClass(SimpleMailMessage.class);
+        emailCodeSender.send("1983517529@qq.com", "123456");
         verify(mailSender).send(messageCaptor.capture());
         SimpleMailMessage sentMessage = messageCaptor.getValue();
         assertEquals("1983517529@qq.com", sentMessage.getTo()[0]);

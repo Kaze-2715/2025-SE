@@ -1,7 +1,6 @@
 package com.agri.platform.service.user;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -11,22 +10,23 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import com.agri.platform.entity.user.VerifyCode;
-import com.agri.platform.interfaces.ICodeSender;
 import com.agri.platform.mapper.user.VerifyCodeMapper;
+import com.agri.platform.util.EmailCodeSender;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class VerifyCodeService {
     private final VerifyCodeMapper codeMapper;
-    private final Map<String, ICodeSender> codeSenders;
+    // private final Map<String, ICodeSender> codeSenders;
+    private final EmailCodeSender emailCodeSender;
 
     public void sendCode(String bizType, String target) {
         String code = RandomStringUtils.insecure().nextNumeric(6);
         LocalDateTime expireTime = LocalDateTime.now().plusMinutes(10);
         codeMapper.saveCode(bizType, target, code, expireTime);
-        ICodeSender sender = codeSenders.get(target.contains("@") ? "emailCodeSender" : "smsCodeSender");
-        sender.send(target, code);
+        // ICodeSender sender = codeSenders.get(target.contains("@") ? "emailCodeSender" : "smsCodeSender");
+        emailCodeSender.send(target, code);
         log.info("Sent verification code to {}: {}", target, code);
     }
 
