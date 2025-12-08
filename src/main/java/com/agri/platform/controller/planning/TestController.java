@@ -1,21 +1,24 @@
 package com.agri.platform.controller.planning;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-// 确保这个类在Spring Boot的扫描范围内（比如和启动类同包/子包）
-@RestController
-public class TestController {
+import com.agri.platform.annotation.RequiredPerm;
 
-    // 定义根路径接口
-    @GetMapping("/")
-    public String index() {
-        return "项目启动成功！这是根路径的返回内容";
+@RestController
+@RequestMapping("/api")
+public class TestController {
+    @GetMapping("/farm")
+    @RequiredPerm("农场-查看")
+    public String listFarm() {
+        return "farm list";
     }
 
-    // 可选：新增一个测试接口
-    @GetMapping("/hello")
-    public String hello() {
-        return "Hello World!";
+    @PostMapping("/device/control")
+    @RequiredPerm("设备-控制")
+    public String controlDevice() {
+        return "device controlled";
     }
 }

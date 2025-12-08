@@ -1,10 +1,12 @@
 package com.agri.platform.mapper.user;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.ResultMap;
 import org.apache.ibatis.annotations.Results;
 import org.apache.ibatis.annotations.Result;
@@ -60,6 +62,13 @@ public interface UserMapper {
     
     @Select("SELECT * FROM t_user WHERE phone_number = #{phoneNumber}")
     Optional<User> selectByPhoneNumber(String phoneNumber);
+
+    @Select("SELECT DISTINCT p.perm_name " +
+            "FROM t_user_role ur " +
+            "JOIN t_role_permission rp ON ur.role_id = rp.role_id " +
+            "JOIN t_permission p ON rp.permission_id = p.permission_id " +
+            "WHERE ur.user_id = #{userId}")
+    List<String> listPermCodeByUserId(@Param("userId") String userId);
 
     @Update("""
             UPDATE t_user

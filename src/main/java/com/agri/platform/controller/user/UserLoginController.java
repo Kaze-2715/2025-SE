@@ -32,7 +32,7 @@ public class UserLoginController {
             String clientIp = getClientIp(request);
             loginDTO = new UserLoginDTO(loginDTO.login(), loginDTO.password(), loginDTO.type(), clientIp);
 
-            User user = loginService.loginUser(loginDTO);
+            User user = loginService.loginUser(loginDTO, request);
 
             LoginResponse response = new LoginResponse(user.getUserId(), user.getUsername(), user.getEmail(), user.getPhoneNumber(), user.getLastLoginTime(), "登录成功");
             return ResponseEntity.ok(response);
