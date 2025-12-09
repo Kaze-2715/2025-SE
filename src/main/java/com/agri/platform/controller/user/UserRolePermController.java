@@ -19,7 +19,6 @@ import java.util.List;
 import com.agri.platform.DTO.RolePermDTO;
 
 import com.agri.platform.DTO.UserRoleDTO;
-import com.agri.platform.entity.user.Permission;
 
 @RestController
 @RequestMapping("/api/user")

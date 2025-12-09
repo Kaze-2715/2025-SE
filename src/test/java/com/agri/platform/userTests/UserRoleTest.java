@@ -1,7 +1,5 @@
 package com.agri.platform.userTests;
 
-import java.util.List;
-
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -9,11 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import static org.assertj.core.api.Assertions.assertThat;
-import org.junit.jupiter.api.Order;
-
-
-import com.agri.platform.DTO.RolePermDTO;
-import com.agri.platform.DTO.UserRoleDTO;
 import com.agri.platform.controller.user.UserRolePermController;
 import com.agri.platform.mapper.user.UserMapper;
 

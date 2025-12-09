@@ -1,18 +1,13 @@
 spring:
   # ===== 数据源 =====
   datasource:
-    driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:testdb;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    username: sa
-    password:
-
-  # ===== 初始化脚本 =====
-  sql:
-    init:
-      mode: always
-      schema-locations: classpath:schema-h2.sql   # 建表
-      data-locations: classpath:data-h2.sql       # 基础数据
-
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://39.104.83.135:3306/smart_agri?serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf8
+    username: kaze
+    password: 901170119
+  # 禁用 H2 自动建表
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.h2.H2ConsoleAutoConfiguration
   # ===== JPA / MyBatis 补充 =====
   jpa:
     hibernate:
@@ -39,7 +34,8 @@ logging:
     root: WARN
     com.agri.platform: INFO
     org.springframework.web: WARN
-    org.mybatis: WARN
+    org.mybatis: trace
+    com.agri.platform.mapper: trace
 
 # ===== 文件上传 =====
 spring.servlet.multipart.enabled: false

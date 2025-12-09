@@ -54,7 +54,6 @@ public class PermissionTest {
         // 事前准备：角色必须存在
         String roleName = "TEST_ROLE";
         controller.addRole(roleName, "desc");
-        String roleId = permissionMapper.selectRoleIdByRoleName(roleName);
 
         // 给用户授予角色
         String testUser = "974a8920-e829-48df-b058-e6c724e1bfa0";

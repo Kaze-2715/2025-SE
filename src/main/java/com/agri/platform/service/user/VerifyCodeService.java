@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.agri.platform.entity.user.VerifyCode;
 import com.agri.platform.mapper.user.VerifyCodeMapper;
-import com.agri.platform.util.EmailCodeSender;
+import com.agri.platform.interfaces.ICodeSender;
 
 @Service
 @Slf4j
@@ -19,7 +19,7 @@ import com.agri.platform.util.EmailCodeSender;
 public class VerifyCodeService {
     private final VerifyCodeMapper codeMapper;
     // private final Map<String, ICodeSender> codeSenders;
-    private final EmailCodeSender emailCodeSender;
+    private final ICodeSender emailCodeSender;
 
     public void sendCode(String bizType, String target) {
         String code = RandomStringUtils.insecure().nextNumeric(6);
