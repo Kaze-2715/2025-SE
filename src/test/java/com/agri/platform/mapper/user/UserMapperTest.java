@@ -472,6 +472,7 @@ public class UserMapperTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void testListUserRole() {
         // 执行查询操作
         // 注意：此测试依赖于预设的测试数据，已在data-h2.sql中配置
@@ -482,6 +483,7 @@ public class UserMapperTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void testListRolePermission() {
         // 执行查询操作
         List<Object> rolePermissions = (List<Object>) (List<?>) userMapper.listRolePermission();

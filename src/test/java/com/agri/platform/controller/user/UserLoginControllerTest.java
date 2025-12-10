@@ -12,23 +12,26 @@ import com.agri.platform.exception.BizException;
 import com.agri.platform.service.user.UserLoginService;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.Mock;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ExtendWith(MockitoExtension.class)
 public class UserLoginControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @Mock
     private UserLoginService loginService;
 
     @Autowired
@@ -38,8 +41,12 @@ public class UserLoginControllerTest {
     void testLogin() throws Exception {
         // 准备测试数据
         UserLoginDTO loginDTO = new UserLoginDTO("testUser", "password123", UserLoginType.USERNAME, "127.0.0.1");
-        //! 注意：这里的User对象需要根据实际情况进行创建
+        // ! 注意：这里的User对象需要根据实际情况进行创建
         User user = new User();
+        user.setUserId("testUserId");
+        user.setUsername("testUser");
+        user.setEmail("test@example.com");
+        user.setPhoneNumber("13800138000");
 
         // 模拟服务层行为
         when(loginService.loginUser(any(UserLoginDTO.class), any())).thenReturn(user);

@@ -8,7 +8,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
