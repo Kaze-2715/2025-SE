@@ -13,7 +13,7 @@ import static org.mockito.Mockito.*;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 
-import com.agri.platform.util.EmailCodeSender;
+import com.agri.platform.util.userRolePermission.EmailCodeSender;
 
 @ExtendWith(MockitoExtension.class)
 public class TestMailSender {

@@ -1,11 +1,11 @@
-package com.agri.platform.util;
+package com.agri.platform.util.userRolePermission;
 
 import java.util.List;
 
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import com.agri.platform.annotation.RequiredPerm;
+import com.agri.platform.annotation.RequiredPermission;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,7 +19,7 @@ public class PermInterceptor implements HandlerInterceptor {
             return true;
 
         HandlerMethod hm = (HandlerMethod) handler;
-        RequiredPerm anno = hm.getMethodAnnotation(RequiredPerm.class);
+        RequiredPermission anno = hm.getMethodAnnotation(RequiredPermission.class);
         if (anno == null)
             return true;
 

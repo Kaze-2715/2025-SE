@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 
 import com.agri.platform.controller.user.UserLoginController.LoginResponse;
@@ -48,27 +47,6 @@ public class LoginLogAspect {
             log.setFailReason(er.message());
         }
         service.save(log);
-        // try {
-        // result = joinPoint.proceed();
-        // log.setSuccess(true);
-        // log.setFailReason(null);
-
-        // if (result instanceof ResponseEntity<?> resp && resp.getBody() instanceof
-        // UserLoginController.LoginResponse r) {
-        // log.setUserId(r.userId());
-        // }
-        // } catch (Throwable ex) {
-        // log.setSuccess(false);
-        // log.setFailReason(ex.getMessage() == null ? "Unknown error" :
-        // ex.getMessage().substring(0, 100));
-        // throw ex;
-        // } finally {
-        // if (joinPoint.getArgs().length > 0 && joinPoint.getArgs()[0] instanceof
-        // String) {
-        // log.setUserId((String) joinPoint.getArgs()[0]);
-        // }
-        // service.save(log);
-        // }
         return result;
     }
 

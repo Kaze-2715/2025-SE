@@ -1,15 +1,11 @@
 package com.agri.platform.service.user;
 
-import javax.sql.DataSource;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.agri.platform.entity.user.LoginLog;
 import com.agri.platform.mapper.user.UserLoginMapper;
-
-import org.springframework.jdbc.core.JdbcTemplate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

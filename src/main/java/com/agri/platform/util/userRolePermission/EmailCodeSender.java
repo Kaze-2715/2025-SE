@@ -1,4 +1,4 @@
-package com.agri.platform.util;
+package com.agri.platform.util.userRolePermission;
 
 import com.agri.platform.interfaces.ICodeSender;
 import org.springframework.beans.factory.annotation.Value;

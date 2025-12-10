@@ -1,4 +1,4 @@
-package com.agri.platform.entity.user;
+package com.agri.platform.entity.log;
 
 import java.time.LocalDateTime;
 

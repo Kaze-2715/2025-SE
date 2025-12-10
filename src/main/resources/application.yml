@@ -1,6 +1,6 @@
 spring:
   application:
-    name: platorm
+    name: platform
   datasource:
     url: jdbc:mysql://39.104.83.135:3306/smart_agri?useSSL=false&serverTimezone=UTC&characterEncoding=utf-8
     username: kaze
@@ -15,6 +15,9 @@ spring:
     properties:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
+platform:
+  audit:
+    enable: true
 
 mybatis:
   configuration:

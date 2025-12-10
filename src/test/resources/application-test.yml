@@ -17,7 +17,9 @@ spring:
     configuration:
       map-underscore-to-camel-case: true
     mapper-locations: classpath*:/mapper/**/*.xml   # 没有 xml 可留空
-
+platform:
+  audit:
+    enable: true
   # ===== 关闭外部组件 =====
   redis:
     host: disabled
