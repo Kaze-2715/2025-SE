@@ -1,0 +1,43 @@
+spring:
+  # ===== 数据源 =====
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://39.104.83.135:3306/smart_agri?serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf8
+    username: kaze
+    password: 901170119
+  # 禁用 H2 自动建表
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.h2.H2ConsoleAutoConfiguration
+  # ===== JPA / MyBatis 补充 =====
+  jpa:
+    hibernate:
+      ddl-auto: none          # 完全关闭自动建表
+    show-sql: false
+  mybatis:
+    configuration:
+      map-underscore-to-camel-case: true
+    mapper-locations: classpath*:/mapper/**/*.xml   # 没有 xml 可留空
+platform:
+  audit:
+    enable: true
+  # ===== 关闭外部组件 =====
+  redis:
+    host: disabled
+  mail:
+    host: disabled
+  sms:
+    enabled: false
+  oss:
+    enabled: false
+
+# ===== 日志 =====
+logging:
+  level:
+    root: WARN
+    com.agri.platform: INFO
+    org.springframework.web: WARN
+    org.mybatis: trace
+    com.agri.platform.mapper: trace
+
+# ===== 文件上传 =====
+spring.servlet.multipart.enabled: false

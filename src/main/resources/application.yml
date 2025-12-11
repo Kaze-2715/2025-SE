@@ -1,8 +1,8 @@
 spring:
   application:
-    name: platorm
+    name: platform
   datasource:
-    url: jdbc:mysql://39.104.83.135:3306/smart_agri?useSSL=false&serverTimezone=UTC&characterEncoding=utf8mb4
+    url: jdbc:mysql://39.104.83.135:3306/smart_agri?useSSL=false&serverTimezone=UTC&characterEncoding=utf-8
     username: kaze
     password: 901170119
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -10,17 +10,23 @@ spring:
     host: smtp.qq.com
     port: 587
     username: 1983517529@qq.com
-    password: zhaofangming1701
+    password: pmfjlrqfgxpldhfc
     default-encoding: UTF-8
     properties:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
+platform:
+  audit:
+    enable: true
 
 mybatis:
   configuration:
     map-underscore-to-camel-case: true
+    default-enum-type-handler: org.apache.ibatis.type.EnumTypeHandler
+    
 
 logging:
   level:
+    com.agri.platform: debug
+    org.springframework.jdbc.core: debug
     root: INFO
-    com.agri.platform: DEBUG
