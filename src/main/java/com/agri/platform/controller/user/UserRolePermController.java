@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
+import java.util.Map;
 
 import com.agri.platform.DTO.RolePermDTO;
 
@@ -42,9 +43,9 @@ public class UserRolePermController {
     }
 
     @PostMapping("/role")
-    public ResponseEntity<Void> addRole(@RequestParam String roleName, @RequestParam String description) {
+    public ResponseEntity<?> addRole(@RequestParam String roleName, @RequestParam String description) {
         userRolePermService.addRole(roleName, description);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(Map.of("code", 0, "msg", "角色已添加"));
     }
 
     @DeleteMapping("/role")

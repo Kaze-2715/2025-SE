@@ -21,6 +21,6 @@ public class WebUtil {
                 return ip.split(",")[0].trim();
             }
         }
-        return request.getRemoteAddr();
+        return request.getRemoteAddr() == null ? "127.0.0.1" : request.getRemoteAddr();
     }
 }
