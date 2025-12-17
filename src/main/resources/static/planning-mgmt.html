@@ -1,0 +1,1975 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智慧农业 - 种植规划与监控系统</title>
+    <!-- 引入外部资源 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <!-- Tailwind 配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#22c55e', // 农业绿
+                        secondary: '#f97316', // 警示橙
+                        danger: '#ef4444', // 预警红
+                        dark: '#1f2937',
+                        light: '#f3f4f6'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card-shadow {
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            }
+            .nav-active {
+                @apply bg-primary/10 text-primary border-l-4 border-primary;
+            }
+            .section-hidden {
+                display: none !important;
+            }
+            .btn-primary {
+                @apply bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-lg transition-all duration-300;
+            }
+            .btn-warning {
+                @apply bg-secondary hover:bg-secondary/90 text-white font-medium py-2 px-4 rounded-lg transition-all duration-300;
+            }
+            .btn-danger {
+                @apply bg-danger hover:bg-danger/90 text-white font-medium py-2 px-4 rounded-lg transition-all duration-300;
+            }
+            .btn-outline {
+                @apply border border-gray-300 hover:border-primary hover:text-primary font-medium py-2 px-4 rounded-lg transition-all duration-300;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans text-dark">
+<!-- 顶部导航栏 -->
+<header class="bg-white shadow-sm fixed top-0 left-0 right-0 z-50">
+    <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+            <i class="fa fa-leaf text-primary text-2xl"></i>
+            <h1 class="text-xl font-bold">智慧农业种植监控系统</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+            <span class="hidden md:inline-block text-sm text-gray-600" id="current-time"></span>
+            <div class="flex items-center space-x-2">
+                <img src="https://picsum.photos/id/1005/40/40" alt="用户头像" class="w-8 h-8 rounded-full object-cover">
+                <span class="text-sm font-medium">农场主A</span>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- 主内容区 -->
+<div class="container mx-auto px-4 pt-24 pb-16 flex flex-col md:flex-row gap-6">
+    <!-- 左侧导航 -->
+    <aside class="md:w-64 bg-white rounded-xl card-shadow p-4 flex-shrink-0">
+        <nav class="space-y-1">
+            <a href="#dashboard" class="nav-active flex items-center space-x-3 px-4 py-3 rounded-lg">
+                <i class="fa fa-dashboard"></i>
+                <span>数据总览</span>
+            </a>
+            <a href="#planting-plan" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors">
+                <i class="fa fa-calendar-check-o"></i>
+                <span>种植规划</span>
+            </a>
+            <a href="#environment-monitor" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors">
+                <i class="fa fa-thermometer-half"></i>
+                <span>环境监控</span>
+            </a>
+            <a href="#pest-warning" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors">
+                <i class="fa fa-exclamation-triangle text-danger"></i>
+                <span>病虫害预警</span>
+                <span class="ml-auto bg-danger text-white text-xs px-2 py-1 rounded-full" id="warning-count">3</span>
+            </a>
+            <a href="#handle-record" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors">
+                <i class="fa fa-list-alt"></i>
+                <span>处理记录</span>
+            </a>
+        </nav>
+
+        <!-- 农场信息卡片 -->
+        <div class="mt-8 bg-primary/5 rounded-xl p-4">
+            <h3 class="font-medium text-primary mb-3">农场信息</h3>
+            <div class="space-y-2 text-sm">
+                <div class="flex justify-between">
+                    <span class="text-gray-600">种植面积</span>
+                    <span class="font-medium">28.5 亩</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">当前作物</span>
+                    <span class="font-medium">水稻、小麦</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">传感器数量</span>
+                    <span class="font-medium">8 个</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">预警处理率</span>
+                    <span class="font-medium text-primary">85%</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- 右侧内容区 -->
+    <main class="flex-1 space-y-8">
+        <!-- 数据总览 -->
+        <section id="dashboard" class="bg-white rounded-xl card-shadow p-6 section-hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold">数据总览</h2>
+                <div class="flex space-x-2">
+                    <button class="btn-outline text-sm px-3 py-1.5">
+                        <i class="fa fa-refresh mr-1"></i> 刷新
+                    </button>
+                </div>
+            </div>
+
+            <!-- 数据卡片组 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <!-- 土壤湿度 -->
+                <div class="bg-blue-50 rounded-xl p-4 border border-blue-100">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-gray-500 text-sm">土壤湿度</p>
+                            <h3 class="text-2xl font-bold mt-1" id="soil-humidity">78.5%</h3>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-500">
+                            <i class="fa fa-tint"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 flex items-center text-sm">
+                            <span class="text-red-500 flex items-center">
+                                <i class="fa fa-arrow-up mr-1"></i> 3.2%
+                            </span>
+                        <span class="text-gray-400 ml-2">较昨日</span>
+                    </div>
+                </div>
+
+                <!-- 土壤温度 -->
+                <div class="bg-orange-50 rounded-xl p-4 border border-orange-100">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-gray-500 text-sm">土壤温度</p>
+                            <h3 class="text-2xl font-bold mt-1" id="soil-temperature">27.8℃</h3>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-500">
+                            <i class="fa fa-thermometer"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 flex items-center text-sm">
+                            <span class="text-red-500 flex items-center">
+                                <i class="fa fa-arrow-up mr-1"></i> 1.5℃
+                            </span>
+                        <span class="text-gray-400 ml-2">较昨日</span>
+                    </div>
+                </div>
+
+                <!-- 预估产量 -->
+                <div class="bg-green-50 rounded-xl p-4 border border-green-100">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-gray-500 text-sm">预估产量</p>
+                            <h3 class="text-2xl font-bold mt-1" id="estimated-yield">16.8 吨</h3>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-500">
+                            <i class="fa fa-bar-chart"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 flex items-center text-sm">
+                            <span class="text-green-500 flex items-center">
+                                <i class="fa fa-arrow-up mr-1"></i> 5.3%
+                            </span>
+                        <span class="text-gray-400 ml-2">较上季</span>
+                    </div>
+                </div>
+
+                <!-- 预警数量 -->
+                <div class="bg-red-50 rounded-xl p-4 border border-red-100">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-gray-500 text-sm">未处理预警</p>
+                            <h3 class="text-2xl font-bold mt-1" id="unhandled-warning">3 条</h3>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-500">
+                            <i class="fa fa-bell"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 flex items-center text-sm">
+                            <span class="text-red-500 flex items-center">
+                                <i class="fa fa-arrow-up mr-1"></i> 1 条
+                            </span>
+                        <span class="text-gray-400 ml-2">较昨日</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 趋势图表 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <h3 class="font-medium mb-4">环境数据趋势（7天）</h3>
+                    <div class="h-64">
+                        <canvas id="environmentChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <h3 class="font-medium mb-4">作物生长状态</h3>
+                    <div class="h-64">
+                        <canvas id="growthChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 种植规划 -->
+        <section id="planting-plan" class="bg-white rounded-xl card-shadow p-6 section-hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold">种植规划</h2>
+                <button class="btn-primary" id="add-plan-btn">
+                    <i class="fa fa-plus mr-1"></i> 新增规划
+                </button>
+            </div>
+
+            <!-- 种植计划表格 -->
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">规划名称</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">作物类型</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">种植面积(亩)</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">种植时间</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">预估产量(吨)</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                    </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200" id="plan-table-body">
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium">2024年早稻种植</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm">水稻</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm">15.2</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm">2024-03-15 至 2024-07-20</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-green-600">9.12</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                        生长中
+                                    </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <button class="text-primary hover:text-primary/80 mr-3">编辑</button>
+                            <button class="text-gray-500 hover:text-gray-700">查看</button>
+                            <button class="text-red-500 hover:text-red-700">删除</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium">2024年冬小麦种植</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm">小麦</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm">13.3</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm">2024-10-05 至 2025-06-10</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-green-600">6.65</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                        播种期
+                                    </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <button class="text-primary hover:text-primary/80 mr-3">编辑</button>
+                            <button class="text-gray-500 hover:text-gray-700">查看</button>
+                            <button class="text-red-500 hover:text-red-700">删除</button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 环境监控 -->
+        <section id="environment-monitor" class="bg-white rounded-xl card-shadow p-6 section-hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold">环境监控</h2>
+                <div class="flex space-x-2">
+                    <div class="relative">
+                        <select class="appearance-none bg-gray-50 border border-gray-300 text-gray-700 py-2 pl-3 pr-8 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50">
+                            <option>全部土地</option>
+                            <option>1号地块</option>
+                            <option>2号地块</option>
+                            <option>3号地块</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                            <i class="fa fa-chevron-down text-xs"></i>
+                        </div>
+                    </div>
+                    <button class="btn-outline text-sm px-3 py-1.5">
+                        <i class="fa fa-download mr-1"></i> 导出数据
+                    </button>
+                </div>
+            </div>
+
+            <!-- 实时数据卡片 -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="border border-gray-200 rounded-xl p-4">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-medium">土壤湿度</h3>
+                        <span class="text-xs text-gray-500" id="humidity-update-time">1分钟前更新</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="text-3xl font-bold mr-3" id="realtime-humidity">78.5%</div>
+                        <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-500">
+                            <i class="fa fa-tint"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div class="bg-blue-500 h-full rounded-full" style="width: 78.5%"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-500 mt-2">
+                        <span>适宜范围: 60%-80%</span>
+                        <span class="text-red-500">略高</span>
+                    </div>
+                </div>
+
+                <div class="border border-gray-200 rounded-xl p-4">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-medium">土壤温度</h3>
+                        <span class="text-xs text-gray-500" id="temperature-update-time">2分钟前更新</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="text-3xl font-bold mr-3" id="realtime-temperature">27.8℃</div>
+                        <div class="h-10 w-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-500">
+                            <i class="fa fa-thermometer"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div class="bg-orange-500 h-full rounded-full" style="width: 68%"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-500 mt-2">
+                        <span>适宜范围: 15℃-30℃</span>
+                        <span class="text-green-500">适宜</span>
+                    </div>
+                </div>
+
+                <div class="border border-gray-200 rounded-xl p-4">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-medium">土壤pH值</h3>
+                        <span class="text-xs text-gray-500" id="ph-update-time">5分钟前更新</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="text-3xl font-bold mr-3" id="realtime-ph">6.8</div>
+                        <div class="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-500">
+                            <i class="fa fa-balance-scale"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div class="bg-purple-500 h-full rounded-full" style="width: 68%"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-500 mt-2">
+                        <span>适宜范围: 6.0-7.5</span>
+                        <span class="text-green-500">适宜</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 历史趋势图表 -->
+            <div class="bg-gray-50 rounded-xl p-4 mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-medium">历史趋势</h3>
+                    <div class="flex space-x-2">
+                        <button class="text-sm px-3 py-1 bg-primary text-white rounded-lg">日</button>
+                        <button class="text-sm px-3 py-1 bg-gray-200 text-gray-700 rounded-lg">周</button>
+                        <button class="text-sm px-3 py-1 bg-gray-200 text-gray-700 rounded-lg">月</button>
+                        <button class="text-sm px-3 py-1 bg-gray-200 text-gray-700 rounded-lg">季</button>
+                    </div>
+                </div>
+                <div class="h-80">
+                    <canvas id="historyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 传感器状态表格 -->
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">传感器编号</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">安装位置</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">监测类型</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">最新数据</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">更新时间</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+                    </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">SN-2024001</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">1号地块</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">土壤湿度、温度</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">湿度:78.5% 温度:27.8℃</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">2024-05-20 14:32:15</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                        正常
+                                    </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">SN-2024002</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">2号地块</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">土壤pH值、湿度</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">pH:6.7 湿度:75.3%</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">2024-05-20 14:30:08</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                        正常
+                                    </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">SN-2024003</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">3号地块</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">土壤温度、EC值</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">温度:26.5℃ EC:1.2ms/cm</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">2024-05-20 14:28:33</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                        信号弱
+                                    </span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 病虫害预警 -->
+        <section id="pest-warning" class="bg-white rounded-xl card-shadow p-6 section-hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold">病虫害预警</h2>
+                <div class="flex space-x-2">
+                    <div class="relative">
+                        <select class="appearance-none bg-gray-50 border border-gray-300 text-gray-700 py-2 pl-3 pr-8 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50">
+                            <option>全部预警</option>
+                            <option>红色预警</option>
+                            <option>黄色预警</option>
+                            <option>已处理</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                            <i class="fa fa-chevron-down text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 预警统计 -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-red-50 rounded-xl p-4 border border-red-100">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">红色预警</p>
+                            <h3 id="red-warning-count" class="text-2xl font-bold mt-1 text-red-600">0 条</h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-red-500">
+                            <i class="fa fa-exclamation-circle text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-yellow-50 rounded-xl p-4 border border-yellow-100">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">黄色预警</p>
+                            <h3 id="yellow-warning-count" class="text-2xl font-bold mt-1 text-yellow-600">0 条</h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-500">
+                            <i class="fa fa-exclamation-triangle text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-green-50 rounded-xl p-4 border border-green-100">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">已处理预警</p>
+                            <h3 id="green-warning-count" class="text-2xl font-bold mt-1 text-green-600">0 条</h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-500">
+                            <i class="fa fa-check-circle text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 预警列表 -->
+<!--            <div class="space-y-4">-->
+<!--                <div class="border-l-4 border-danger bg-red-50 rounded-r-xl p-4">-->
+<!--                    <div class="flex justify-between items-start">-->
+<!--                        <div>-->
+<!--                            <div class="flex items-center space-x-2">-->
+<!--                                <span class="px-2 py-1 bg-danger text-white text-xs rounded-full">红色预警</span>-->
+<!--                                <h3 class="font-medium">1号地块水稻真菌病害风险</h3>-->
+<!--                            </div>-->
+<!--                            <p class="text-sm text-gray-600 mt-2">土壤湿度82.3%，温度29.5℃，持续3天处于高湿高温环境，真菌病害发生概率85%以上</p>-->
+<!--                            <div class="flex items-center text-xs text-gray-500 mt-2">-->
+<!--                                <span class="mr-4"><i class="fa fa-map-marker mr-1"></i> 1号地块</span>-->
+<!--                                <span class="mr-4"><i class="fa fa-calendar mr-1"></i> 2024-05-18</span>-->
+<!--                                <span><i class="fa fa-clock-o mr-1"></i> 10:23</span>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        <button class="btn-danger text-sm" onclick="showHandleModal(1)">-->
+<!--                            处理预警-->
+<!--                        </button>-->
+<!--                    </div>-->
+<!--                </div>-->
+
+<!--<div class="border-l-4 border-danger bg-red-50 rounded-r-xl p-4">-->
+<!--                    <div class="flex justify-between items-start">-->
+<!--                        <div>-->
+<!--                            <div class="flex items-center space-x-2">-->
+<!--                                <span class="px-2 py-1 bg-danger text-white text-xs rounded-full">红色预警</span>-->
+<!--                                <h3 class="font-medium">2号地块小麦蚜虫虫害风险</h3>-->
+<!--                            </div>-->
+<!--                            <p class="text-sm text-gray-600 mt-2">近期气温回升至适宜蚜虫繁殖温度，且土壤氮含量偏高，虫害发生风险等级高</p>-->
+<!--                            <div class="flex items-center text-xs text-gray-500 mt-2">-->
+<!--                                <span class="mr-4"><i class="fa fa-map-marker mr-1"></i> 2号地块</span>-->
+<!--                                <span class="mr-4"><i class="fa fa-calendar mr-1"></i> 2024-05-19</span>-->
+<!--                                <span><i class="fa fa-clock-o mr-1"></i> 08:45</span>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        <button class="btn-danger text-sm" onclick="showHandleModal(2)">-->
+<!--                            处理预警-->
+<!--                        </button>-->
+<!--                    </div>-->
+<!--                </div>-->
+
+                <!-- 黄色预警 -->
+<!--                <div class="border-l-4 border-yellow-500 bg-yellow-50 rounded-r-xl p-4">-->
+<!--                    <div class="flex justify-between items-start">-->
+<!--                        <div>-->
+<!--                            <div class="flex items-center space-x-2">-->
+<!--                                <span class="px-2 py-1 bg-yellow-500 text-white text-xs rounded-full">黄色预警</span>-->
+<!--                                <h3 class="font-medium">1号地块水稻稻飞虱虫害风险</h3>-->
+<!--                            </div>-->
+<!--                            <p class="text-sm text-gray-600 mt-2">周边区域监测到稻飞虱活动，当前环境条件适宜繁殖，建议加强监测</p>-->
+<!--                            <div class="flex items-center text-xs text-gray-500 mt-2">-->
+<!--                                <span class="mr-4"><i class="fa fa-map-marker mr-1"></i> 1号地块</span>-->
+<!--                                <span class="mr-4"><i class="fa fa-calendar mr-1"></i> 2024-05-19</span>-->
+<!--                                <span><i class="fa fa-clock-o mr-1"></i> 14:30</span>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        <button class="btn-warning text-sm" onclick="showHandleModal(4)">-->
+<!--                            处理预警-->
+<!--                        </button>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+            <!-- 预警列表 -->
+            <div id="warning-list-container" class="space-y-4"></div>
+        </section>
+
+        <!-- 处理记录 -->
+        <section id="handle-record" class="bg-white rounded-xl card-shadow p-6 section-hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold">预警处理记录</h2>
+                <div class="relative">
+                    <input type="text" placeholder="搜索预警编号/作物类型" class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 w-64">
+                    <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+
+            <!-- 处理记录表格 -->
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">记录ID</th>
+<!--                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">预警编号</th>-->
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">作物类型</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">预警类型</th>
+<!--                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[300px]">处理措施</th>-->
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">处理措施</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">处理时间</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">处理效果</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作人</th>
+                    </tr>
+                    </thead>
+                    <tbody id="handle-record-table-body" class="bg-white divide-y divide-gray-200">
+<!--                    <tr>-->
+<!--                        <td class="px-6 py-4 whitespace-nowrap text-sm">REC-20240517001</td>-->
+<!--                        <td class="px-6 py-4 whitespace-nowrap text-sm">WARN-20240516003</td>-->
+<!--                        <td class="px-6 py-4 whitespace-nowrap text-sm">水稻</td>-->
+<!--                        <td class="px-6 py-4 whitespace-nowrap text-sm">真菌病害</td>-->
+<!--                        <td class="px-6 py-4 text-sm">使用多菌灵可湿性粉剂稀释800倍喷雾，每周1次，连续2周</td>-->
+<!--                        <td class="px-6 py-4 whitespace-nowrap text-sm">2024-05-17 09:30</td>-->
+<!--                        <td class="px-6 py-4 whitespace-nowrap">-->
+<!--                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">-->
+<!--                                        效果良好-->
+<!--                                    </span>-->
+<!--                        </td>-->
+<!--                        <td class="px-6 py-4 whitespace-nowrap text-sm">农场主A</td>-->
+<!--                    </tr>-->
+<!--                    <tr>-->
+<!--                        <td class="px-6 py-4 whitespace-nowrap text-sm">REC-20240515002</td>-->
+<!--                        <td class="px-6 py-4 whitespace-nowrap text-sm">WARN-20240514001</td>-->
+<!--                        <td class="px-6 py-4 whitespace-nowrap text-sm">小麦</td>-->
+<!--                        <td class="px-6 py-4 whitespace-nowrap text-sm">蚜虫虫害</td>-->
+<!--                        <td class="px-6 py-4 text-sm">使用吡虫啉水分散粒剂稀释1500倍喷雾，间隔7天再喷1次</td>-->
+<!--                        <td class="px-6 py-4 whitespace-nowrap text-sm">2024-05-15 14:20</td>-->
+<!--                        <td class="px-6 py-4 whitespace-nowrap">-->
+<!--                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">-->
+<!--                                        完全控制-->
+<!--                                    </span>-->
+<!--                        </td>-->
+<!--                        <td class="px-6 py-4 whitespace-nowrap text-sm">农场主A</td>-->
+<!--                    </tr>-->
+<!--                    <tr>-->
+<!--                        <td class="px-6 py-4 whitespace-nowrap text-sm">REC-20240512001</td>-->
+<!--                        <td class="px-6 py-4 whitespace-nowrap text-sm">WARN-20240511002</td>-->
+<!--                        <td class="px-6 py-4 whitespace-nowrap text-sm">水稻</td>-->
+<!--                        <td class="px-6 py-4 whitespace-nowrap text-sm">纹枯病</td>-->
+<!--                        <td class="px-6 py-4 text-sm">及时排水降低田间湿度，使用井冈霉素水剂稀释500倍喷雾</td>-->
+<!--                        <td class="px-6 py-4 whitespace-nowrap text-sm">2024-05-12 11:45</td>-->
+<!--                        <td class="px-6 py-4 whitespace-nowrap">-->
+<!--                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">-->
+<!--                                        部分控制-->
+<!--                                    </span>-->
+<!--                        </td>-->
+<!--                        <td class="px-6 py-4 whitespace-nowrap text-sm">农场主A</td>-->
+<!--                    </tr>-->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- 处理预警模态框 -->
+<div id="handle-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl w-full max-w-md mx-4 overflow-hidden">
+        <div class="p-6 border-b border-gray-200">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-bold" id="modal-title">处理预警 - 真菌病害风险</h3>
+                <button class="text-gray-400 hover:text-gray-500" onclick="hideHandleModal()">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <p class="text-sm text-gray-500 mt-2" id="modal-desc">请记录针对该病虫害预警的处理措施</p>
+        </div>
+        <div class="p-6">
+            <form id="handle-form">
+                <input type="hidden" id="warning-id-input" value=""> <!-- 隐藏字段存储预警ID -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">处理措施</label>
+                    <textarea id="handle-measure-input" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="请详细描述处理措施..."></textarea>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">使用药剂</label>
+                    <input type="text" id="pesticide-input" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="如：多菌灵可湿性粉剂">
+                </div>
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">用药浓度</label>
+                        <input type="text" id="concentration-input" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="如：800倍稀释">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">处理时间</label>
+                        <input type="datetime-local" id="handle-time-input" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50">
+                    </div>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">效果反馈</label>
+                    <select id="effect-feedback-select" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50">
+                        <option value="完全控制">完全控制</option>
+                        <option value="效果良好">效果良好</option>
+                        <option value="部分控制">部分控制</option>
+                        <option value="无明显效果">无明显效果</option>
+                    </select>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">备注</label>
+                    <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="其他需要说明的信息">
+                </div>
+                <div class="flex space-x-3">
+                    <button type="button" class="flex-1 btn-outline" onclick="hideHandleModal()">
+                    取消
+                    </button>
+                    <button type="submit" class="flex-1 btn-primary">
+                    提交处理记录
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 新增种植计划模态框 -->
+<div id="add-plan-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl w-full max-w-2xl mx-4 overflow-hidden">
+        <div class="p-6 border-b border-gray-200">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-bold">新增种植规划</h3>
+                <button class="text-gray-400 hover:text-gray-500" onclick="hideAddPlanModal()">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <div class="p-6">
+            <form id="add-plan-form">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">规划名称</label>
+                        <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="如：2024年晚稻种植">
+                    </div>
+                    <!-- 修复后的作物类型选择框 -->
+<div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">作物类型</label>
+                        <select id="crop-type-select" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50">
+                            <option value="">请选择作物类型</option>
+                            <option>水稻</option>
+                            <option>小麦</option>
+                            <option>玉米</option>
+                            <option>大豆</option>
+                            <option>棉花</option>
+                        </select>
+                    </div>
+
+                    <!-- 修复后的种植面积输入框 -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">种植面积(亩)</label>
+                        <input type="number" step="0.1" id="planting-area-input" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="请输入种植面积">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">预估产量(吨)</label>
+                        <input type="number" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50" id="estimated-yield-input" readonly placeholder="系统自动计算">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">种植开始时间</label>
+                        <input type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50">
+</div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">预计收获时间</label>
+                        <input type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50">
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">种植地块</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <label class="flex items-center space-x-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                            <input type="checkbox" class="form-checkbox text-primary rounded">
+                            <span>1号地块</span>
+                        </label>
+                        <label class="flex items-center space-x-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                            <input type="checkbox" class="form-checkbox text-primary rounded">
+                            <span>2号地块</span>
+                        </label>
+                        <label class="flex items-center space-x-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                            <input type="checkbox" class="form-checkbox text-primary rounded">
+                            <span>3号地块</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">备注说明</label>
+                    <textarea rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="请输入备注信息..."></textarea>
+                </div>
+                <div class="flex space-x-3">
+                    <button type="button" class="flex-1 btn-outline" onclick="hideAddPlanModal()">
+                        取消
+                    </button>
+                    <button type="submit" class="flex-1 btn-primary">
+                        保存种植规划
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 编辑种植计划模态框 -->
+<div id="edit-plan-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl w-full max-w-2xl mx-4 overflow-hidden">
+        <div class="p-6 border-b border-gray-200">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-bold">编辑种植规划</h3>
+                <button class="text-gray-400 hover:text-gray-500" onclick="hideEditPlanModal()">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <div class="p-6">
+            <form id="edit-plan-form">
+                <input type="hidden" id="edit-plan-id">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">规划名称</label>
+                        <input type="text" id="edit-plan-name" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="如：2024年晚稻种植">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">作物类型</label>
+                        <select id="edit-crop-type-select" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50">
+                            <option value="">请选择作物类型</option>
+                            <option>水稻</option>
+                            <option>小麦</option>
+                            <option>玉米</option>
+                            <option>大豆</option>
+                            <option>棉花</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">种植面积(亩)</label>
+                        <input type="number" step="0.1" id="edit-planting-area-input" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="请输入种植面积">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">预估产量(吨)</label>
+                        <input type="number" step="0.01" id="edit-estimated-yield-input" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="系统自动计算">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">种植开始时间</label>
+                        <input type="date" id="edit-planting-time" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">预计收获时间</label>
+                        <input type="date" id="edit-expected-harvest-time" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50">
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">种植地块</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <label class="flex items-center space-x-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                            <input type="checkbox" class="form-checkbox text-primary rounded">
+                            <span>1号地块</span>
+                        </label>
+                        <label class="flex items-center space-x-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                            <input type="checkbox" class="form-checkbox text-primary rounded">
+                            <span>2号地块</span>
+                        </label>
+                        <label class="flex items-center space-x-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                            <input type="checkbox" class="form-checkbox text-primary rounded">
+                            <span>3号地块</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">备注说明</label>
+                    <textarea rows="3" id="edit-plan-remark" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="请输入备注信息..."></textarea>
+                </div>
+                <div class="flex space-x-3">
+                    <button type="button" class="flex-1 btn-outline" onclick="hideEditPlanModal()">
+                        取消
+                    </button>
+                    <button type="submit" class="flex-1 btn-primary">
+                        保存修改
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 查看种植计划模态框 -->
+<div id="view-plan-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl w-full max-w-2xl mx-4 overflow-hidden">
+        <div class="p-6 border-b border-gray-200">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-bold">查看种植规划</h3>
+                <button class="text-gray-400 hover:text-gray-500" onclick="hideViewPlanModal()">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <div class="p-6">
+            <div class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">规划名称</label>
+                        <div class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50" id="view-plan-name"></div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">作物类型</label>
+                        <div class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50" id="view-crop-type"></div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">种植面积(亩)</label>
+                        <div class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50" id="view-planting-area"></div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">预估产量(吨)</label>
+                        <div class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50" id="view-estimated-yield"></div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">种植开始时间</label>
+                        <div class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50" id="view-planting-time"></div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">预计收获时间</label>
+                        <div class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50" id="view-expected-harvest-time"></div>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">种植地块</label>
+                    <div class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50" id="view-planting-land"></div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">备注说明</label>
+                    <div class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50" id="view-plan-remark"></div>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button type="button" class="btn-primary" onclick="hideViewPlanModal()">
+                    关闭
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 页脚 -->
+<footer class="bg-white border-t border-gray-200 py-4">
+    <div class="container mx-auto px-4 text-center text-sm text-gray-500">
+        <p>© 2025 智慧农业种植监控系统 - 版权所有</p>
+    </div>
+</footer>
+<!-- JavaScript -->
+<script>
+    // 环境数据趋势图表
+    const environmentCtx = document.getElementById('environmentChart').getContext('2d');
+    new Chart(environmentCtx, {
+        type: 'line',
+        data: {
+            labels: ['5/14', '5/15', '5/16', '5/17', '5/18', '5/19', '5/20'],
+            datasets: [
+                {
+                    label: '土壤湿度(%)',
+                    data: [72.3, 74.5, 76.2, 75.8, 77.4, 79.1, 78.5],
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.3,
+                    fill: true
+                },
+                {
+                    label: '土壤温度(℃)',
+                    data: [24.1, 25.3, 26.8, 27.2, 28.5, 28.1, 27.8],
+                    borderColor: '#f97316',
+                    backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                    tension: 0.3,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false
+                }
+            }
+        }
+    });
+
+    // 作物生长状态图表
+    const growthCtx = document.getElementById('growthChart').getContext('2d');
+    new Chart(growthCtx, {
+        type: 'bar',
+        data: {
+            labels: ['水稻', '小麦', '玉米', '大豆'],
+            datasets: [
+                {
+                    label: '生长进度(%)',
+                    data: [65, 30, 80, 0],
+                    backgroundColor: [
+                        'rgba(34, 197, 94, 0.7)',
+                        'rgba(59, 130, 246, 0.7)',
+                        'rgba(168, 85, 247, 0.7)',
+                        'rgba(234, 179, 8, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgb(34, 197, 94)',
+                        'rgb(59, 130, 246)',
+                        'rgb(168, 85, 247)',
+                        'rgb(234, 179, 8)'
+                    ],
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100
+                }
+            }
+        }
+    });
+
+    // 环境数据历史趋势图表
+<!--    const historyCtx = document.getElementById('historyChart').getContext('2d');-->
+<!--    new Chart(historyCtx, {-->
+<!--        type: 'line',-->
+<!--        data: {-->
+<!--            labels: Array.from({length: 24}, (_, i) => `${i}:00`), // 24小时时间标签-->
+<!--            datasets: [-->
+<!--                {-->
+<!--                    label: '土壤湿度(%)',-->
+<!--                    data: Array.from({length: 24}, () => (Math.random() * 15 + 65).toFixed(1)),-->
+<!--                    borderColor: '#3b82f6',-->
+<!--                    backgroundColor: 'rgba(59, 130, 246, 0.1)',-->
+<!--                    tension: 0.3,-->
+<!--                    fill: true-->
+<!--                },-->
+<!--                {-->
+<!--                    label: '土壤温度(℃)',-->
+<!--                    data: Array.from({length: 24}, () => (Math.random() * 8 + 22).toFixed(1)),-->
+<!--                    borderColor: '#f97316',-->
+<!--                    backgroundColor: 'rgba(249, 115, 22, 0.1)',-->
+<!--                    tension: 0.3,-->
+<!--                    fill: true-->
+<!--                },-->
+<!--                {-->
+<!--                    label: '土壤pH值',-->
+<!--                    data: Array.from({length: 24}, () => (Math.random() * 1.5 + 6.0).toFixed(1)),-->
+<!--                    borderColor: '#a855f7',-->
+<!--                    backgroundColor: 'rgba(168, 85, 247, 0.1)',-->
+<!--                    tension: 0.3,-->
+<!--                    fill: true-->
+<!--                }-->
+<!--            ]-->
+<!--        },-->
+<!--        options: {-->
+<!--            responsive: true,-->
+<!--            maintainAspectRatio: false,-->
+<!--            plugins: {-->
+<!--                legend: {-->
+<!--                    position: 'top',-->
+<!--                }-->
+<!--            },-->
+<!--            scales: {-->
+<!--                y: {-->
+<!--                    beginAtZero: false-->
+<!--                }-->
+<!--            }-->
+<!--        }-->
+<!--    });-->
+    // 环境数据历史趋势图表
+const historyCtx = document.getElementById('historyChart').getContext('2d');
+new Chart(historyCtx, {
+    type: 'line',
+    data: {
+        // 生成从当前时间开始倒回24小时的时间标签（只显示整点）
+        labels: Array.from({length: 24}, (_, i) => {
+            const time = new Date(Date.now() - i * 60 * 60 * 1000);
+            const hours = time.getHours().toString().padStart(2, '0');
+            return `${hours}:00`; // 只显示整点，固定为:00
+        }).reverse(), // 反转数组，使时间从左到右递增
+        datasets: [
+            {
+                label: '土壤湿度(%)',
+                data: Array.from({length: 24}, () => (Math.random() * 15 + 65).toFixed(1)),
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                tension: 0.3,
+                fill: true
+            },
+            {
+                label: '土壤温度(℃)',
+                data: Array.from({length: 24}, () => (Math.random() * 8 + 22).toFixed(1)),
+                borderColor: '#f97316',
+                backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                tension: 0.3,
+                fill: true
+            },
+            {
+                label: '土壤pH值',
+                data: Array.from({length: 24}, () => (Math.random() * 1.5 + 6.0).toFixed(1)),
+                borderColor: '#a855f7',
+                backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                tension: 0.3,
+                fill: true
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'top',
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: false
+            }
+        }
+    }
+});
+
+    
+// 加载病虫害预警数据
+function loadPestWarnings() {
+    fetch('http://localhost:8080/pest-warning/list')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('网络请求失败');
+            }
+            return response.json();
+        })
+        .then(result => {
+            // 清空预警列表
+            const warningContainer = document.getElementById('warning-list-container');
+            warningContainer.innerHTML = '';
+
+            // 检查返回数据格式是否正确
+            if (!result) {
+                console.error('返回数据为空:', result);
+                warningContainer.innerHTML = '<div class="text-center py-4 text-gray-500">暂无预警数据</div>';
+                // 更新导航栏预警数量为0
+                const warningCountElement = document.getElementById('warning-count');
+                if (warningCountElement) {
+                    warningCountElement.textContent = '0';
+                }
+                return;
+            }
+
+            // 适应不同的数据格式
+            const warnings = Array.isArray(result.data) ? result.data : (Array.isArray(result) ? result : []);
+
+            if (warnings.length === 0) {
+                warningContainer.innerHTML = '<div class="text-center py-4 text-gray-500">暂无预警数据</div>';
+                // 更新导航栏预警数量为0
+                const warningCountElement = document.getElementById('warning-count');
+                if (warningCountElement) {
+                    warningCountElement.textContent = '0';
+                }
+                return;
+            }
+
+            // 计算各类型预警数量
+            const redWarningCount = warnings.filter(w => w.warningLevel === 3).length;
+            const yellowWarningCount = warnings.filter(w => w.warningLevel === 2).length;
+            const greenWarningCount = warnings.filter(w => w.handleStatus === 2).length;
+
+            // 更新统计数字
+            document.getElementById('red-warning-count').textContent = `${redWarningCount} 条`;
+            document.getElementById('yellow-warning-count').textContent = `${yellowWarningCount} 条`;
+            document.getElementById('green-warning-count').textContent = `${greenWarningCount} 条`;
+            
+            // 更新导航栏预警数量
+            const warningCountElement = document.getElementById('warning-count');
+            if (warningCountElement) {
+                warningCountElement.textContent = redWarningCount;
+            }
+
+            // 重新渲染预警列表
+            warnings.forEach(warning => {
+                // 根据预警级别确定样式
+                let warningClass = '';
+                let iconClass = '';
+                let levelText = '';
+                let buttonClass = '';
+
+                // 后端返回的warningLevel是数字，需要转换为对应的字符串
+                switch(warning.warningLevel) {
+                    case 3: // 红色预警
+                        warningClass = 'border-l-4 border-danger bg-red-50 rounded-r-xl';
+                        iconClass = 'fa-exclamation-circle text-red-500';
+                        levelText = '红色预警';
+                        buttonClass = 'btn-danger';
+                        break;
+                    case 2: // 黄色预警
+                        warningClass = 'border-l-4 border-yellow-500 bg-yellow-50 rounded-r-xl';
+                        iconClass = 'fa-exclamation-triangle text-yellow-500';
+                        levelText = '黄色预警';
+                        buttonClass = 'btn-warning';
+                        break;
+                    case 1: // 绿色预警（已处理）
+                        warningClass = 'border-l-4 border-green-500 bg-green-50 rounded-r-xl';
+                        iconClass = 'fa-check-circle text-green-500';
+                        levelText = '已处理';
+                        buttonClass = 'btn-success';
+                        break;
+                    default:
+                        warningClass = 'border-l-4 border-gray-500 bg-gray-50 rounded-r-xl';
+                        iconClass = 'fa-info-circle text-gray-500';
+                        levelText = warning.status || '未知'; // 使用后端返回的status字段
+                        buttonClass = 'btn-gray';
+                }
+
+                // 格式化时间 - 后端返回的是createTime，不是warningTime
+                const warningTime = warning.createTime ? new Date(warning.createTime).toLocaleString() : '';
+                const warningDate = warning.createTime ? new Date(warning.createTime).toLocaleDateString() : '';
+                const warningHourMinute = warning.createTime ? new Date(warning.createTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+
+                // 构建预警卡片
+                const warningDiv = document.createElement('div');
+                warningDiv.className = `${warningClass} p-4`;
+                warningDiv.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="flex items-center space-x-2">
+                                <span class="px-2 py-1 ${levelText === '红色预警' ? 'bg-danger' : levelText === '黄色预警' ? 'bg-yellow-500' : 'bg-green-500'} text-white text-xs rounded-full">${levelText}</span>
+                                <h3 class="font-medium">${warning.landId || ''}号地块${warning.warningType || ''}风险</h3>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-2">${warning.warningReason || warning.description || ''}</p>
+                            <div class="flex items-center text-xs text-gray-500 mt-2">
+                                <span class="mr-4"><i class="fa fa-map-marker mr-1"></i> ${warning.landId || ''}号地块</span>
+                                <span class="mr-4"><i class="fa fa-calendar mr-1"></i> ${warningDate}</span>
+                                <span><i class="fa fa-clock-o mr-1"></i> ${warningHourMinute}</span>
+                            </div>
+                        </div>
+                        ${levelText !== '已处理' ? `<button class="${buttonClass} text-sm" onclick="showHandleModal(${warning.warningId || 0})">处理</button>` : ''}
+                    </div>
+                `;
+                warningContainer.appendChild(warningDiv);
+            });
+        })
+        .catch(error => {
+            console.error('加载病虫害预警失败:', error);
+            const warningContainer = document.getElementById('warning-list-container');
+            warningContainer.innerHTML = '<div class="text-center py-4 text-gray-500">加载失败，请检查后端服务</div>';
+        });
+}
+
+
+    // 全局变量：存储当前处理的预警ID（点击“处理预警”时赋值）
+    let currentWarningId = 0;
+
+    // 1. 点击“处理预警”时，记录预警ID并打开弹窗
+    function showHandleModal(warningId) {
+        currentWarningId = warningId; // 保存当前预警ID
+        // 将预警ID设置到隐藏字段中
+        document.getElementById("warning-id-input").value = warningId;
+        document.getElementById("handle-modal").classList.remove("hidden"); // 打开弹窗
+    }
+
+    // 2. 提交处理表单 - 处理预警
+    document.getElementById('handle-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // 获取表单数据
+        const warningId = document.getElementById('warning-id-input').value;
+        const handleMeasureInput = document.getElementById('handle-measure-input');
+        const pesticideInput = document.getElementById('pesticide-input');
+        const concentrationInput = document.getElementById('concentration-input');
+        const handleTimeInput = document.getElementById('handle-time-input');
+        const effectFeedbackSelect = document.getElementById('effect-feedback-select');
+
+        // 验证必填字段
+        if (!handleMeasureInput.value.trim()) {
+            alert('请填写处理措施');
+            handleMeasureInput.focus();
+            return;
+        }
+
+        if (!handleTimeInput.value) {
+            alert('请选择处理时间');
+            handleTimeInput.focus();
+            return;
+        }
+
+        // 构建完整处理措施（包含药剂和浓度信息）
+        let fullHandleMeasure = handleMeasureInput.value;
+        if (pesticideInput.value.trim()) {
+            fullHandleMeasure += `\n使用药剂：${pesticideInput.value}`;
+        }
+        if (concentrationInput.value.trim()) {
+            fullHandleMeasure += `\n用药浓度：${concentrationInput.value}`;
+        }
+
+        // 构建请求数据
+        const formData = {
+            warningId: parseInt(warningId),
+            handlePerson: 1,
+            handleMeasure: fullHandleMeasure,
+            handleTime: new Date(handleTimeInput.value).toISOString(),
+            effectFeedback: effectFeedbackSelect.value
+        };
+
+        // 发送POST请求到后端API
+        fetch('http://localhost:8080/warning-handle/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('网络请求失败');
+            }
+            return response.text();
+        })
+        .then(data => {
+            // 检查返回内容是否为成功信息
+            if (data.includes('成功')) {
+                // 显示成功消息
+                alert(data);
+
+                // 关闭模态框
+                hideHandleModal();
+
+                // 更新预警数量
+                const warningCount = document.getElementById('warning-count');
+                let count = parseInt(warningCount.textContent);
+                warningCount.textContent = count - 1;
+                document.getElementById('unhandled-warning').textContent = (count - 1) + ' 条';
+
+                // 刷新处理记录表格
+                refreshHandleRecordsTable();
+            } else {
+                // 显示错误消息
+                alert(data);
+            }
+        })
+        .catch(error => {
+            console.error('处理失败:', error);
+            alert('处理失败，请检查控制台错误信息');
+        });
+    });
+
+
+    function hideHandleModal() {
+        const modal = document.getElementById('handle-modal');
+        modal.classList.add('hidden');
+        document.getElementById('handle-form').reset();
+    }
+
+    // 新增种植计划模态框
+    document.getElementById('add-plan-btn').addEventListener('click', function() {
+        document.getElementById('add-plan-modal').classList.remove('hidden');
+    });
+
+    function hideAddPlanModal() {
+        document.getElementById('add-plan-modal').classList.add('hidden');
+        document.getElementById('add-plan-form').reset();
+    }
+
+    // 自动计算预估产量
+    document.getElementById('planting-area-input').addEventListener('input', function() {
+        const area = parseFloat(this.value);
+        const cropType = document.getElementById('crop-type-select').value;
+
+        if (!isNaN(area) && cropType) {
+            // 单位面积产量（吨/亩）
+            const yieldMap = {
+                '水稻': 0.6,
+                '小麦': 0.5,
+                '玉米': 0.45,
+                '大豆': 0.15,
+                '棉花': 0.1
+            };
+            const estimated = (area * yieldMap[cropType]).toFixed(2);
+            document.getElementById('estimated-yield-input').value = estimated;
+        } else {
+            document.getElementById('estimated-yield-input').value = '';
+        }
+    });
+
+    // 作物类型改变时重新计算预估产量
+    document.getElementById('crop-type-select').addEventListener('change', function() {
+        const areaInput = document.getElementById('planting-area-input');
+        if (areaInput.value) {
+            areaInput.dispatchEvent(new Event('input'));
+        }
+    });
+
+
+// 刷新处理记录表格
+function refreshHandleRecordsTable() {
+    // 发送GET请求获取最新的处理记录
+    fetch('http://localhost:8080/warning-handle/list')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('网络请求失败');
+            }
+            return response.json();
+        })
+        .then(result => {
+            // 清空表格
+            const tableBody = document.querySelector('#handle-record-table-body');
+            tableBody.innerHTML = '';
+
+            // 检查返回数据格式是否正确
+            if (!result) {
+                console.error('返回数据为空:', result);
+                tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-gray-500">暂无数据</td></tr>';
+                return;
+            }
+
+            // 适应不同的数据格式
+            const records = Array.isArray(result.data) ? result.data : (Array.isArray(result) ? result : []);
+
+            if (records.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-gray-500">暂无数据</td></tr>';
+                return;
+            }
+
+            // 重新渲染表格行
+            records.forEach(record => {
+                const tr = document.createElement('tr');
+
+                // 格式化处理时间（添加空值检查）
+                const handleTime = record.handleTime ? new Date(record.handleTime).toLocaleString() : '';
+
+                // 确定效果反馈的样式
+                let effectClass = '';
+                let feedback = record.effectFeedback || '';
+                switch(feedback) {
+                    case '完全控制':
+                    case '效果良好':
+                        effectClass = 'bg-green-100 text-green-800';
+                        break;
+                    case '部分控制':
+                        effectClass = 'bg-yellow-100 text-yellow-800';
+                        break;
+                    default:
+                        effectClass = 'bg-red-100 text-red-800';
+                }
+
+                // 构建表格行内容（修复字段映射错误）
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">${record.id || ''}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">${record.cropType || ''}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">${record.warningType || ''}</td>
+                    <td class="px-6 py-4 text-sm">${record.handleMeasure || ''}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">${handleTime}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${effectClass}">
+                            ${feedback}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">农场主A</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        })
+        .catch(error => {
+            console.error('刷新处理记录失败:', error);
+            // 只在控制台显示错误，不弹出alert避免影响用户体验
+            const tableBody = document.querySelector('#handle-record-table-body');
+            tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-gray-500">加载失败，请检查后端服务</td></tr>';
+        });
+}
+
+// 表单提交 - 新增种植计划
+document.getElementById('add-plan-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    // 获取表单数据
+    const planNameInput = this.querySelector('input[placeholder="如：2024年晚稻种植"]');
+    const cropTypeSelect = document.getElementById('crop-type-select');
+    const plantingAreaInput = document.getElementById('planting-area-input');
+    const dateInputs = this.querySelectorAll('input[type="date"]');
+
+    // 创建新的种植计划数据
+    const newPlan = {
+        planName: planNameInput.value,
+        cropType: cropTypeSelect.value,
+        plantingArea: parseFloat(plantingAreaInput.value),
+        plantingTime: dateInputs[0].value,
+        expectedHarvestTime: dateInputs[1].value,
+        expectedYield: parseFloat(document.getElementById('estimated-yield-input').value)
+    };
+
+    // 获取表格体
+    const tableBody = document.getElementById('plan-table-body');
+
+    // 创建新的表格行
+    const newRow = document.createElement('tr');
+
+    // 格式化种植时间
+    const plantingPeriod = `${newPlan.plantingTime} 至 ${newPlan.expectedHarvestTime}`;
+
+    // 动态判断种植状态
+    // 假设当前时间是2024-01-01，用于测试
+    const today = new Date().toISOString().split('T')[0];
+    let status = "未开始";
+    let statusClass = "bg-blue-100 text-blue-800";
+
+    if (newPlan.plantingTime < today) {
+        // 种植日期在今天之前，显示为生长中
+        status = "生长中";
+        statusClass = "bg-green-100 text-green-800";
+    } else if (newPlan.plantingTime === today) {
+        // 种植日期是今天，显示为播种期
+        status = "播种期";
+        statusClass = "bg-yellow-100 text-yellow-800";
+    } else if (newPlan.expectedHarvestTime < today) {
+        // 预期收获时间在今天之前，显示为已完成
+        status = "已完成";
+        statusClass = "bg-gray-100 text-gray-800";
+    } else {
+        // 其他情况，显示为未开始
+        status = "未开始";
+        statusClass = "bg-blue-100 text-blue-800";
+    }
+
+    // 设置行内容
+    newRow.innerHTML = `
+        <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm font-medium">${newPlan.planName}</div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm">${newPlan.cropType}</div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm">${newPlan.plantingArea}</div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm">${plantingPeriod}</div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm font-medium text-green-600">${newPlan.expectedYield}</div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">
+            ${status}
+        </span>
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+        <button class="text-primary hover:text-primary/80 mr-3">编辑</button>
+        <button class="text-gray-500 hover:text-gray-700">查看</button>
+        <button class="text-red-500 hover:text-red-700">删除</button>
+    </td>
+    `;
+
+    // 添加新行到表格
+    tableBody.appendChild(newRow);
+    // 为新添加的行中的编辑和查看按钮添加事件监听器
+    const newEditButton = newRow.querySelector('button.text-primary');
+    const newViewButton = newRow.querySelector('button.text-gray-500');
+    const newDeleteButton = newRow.querySelector('button.text-red-500');
+    const planId = tableBody.querySelectorAll('tr').length;
+
+    newEditButton.addEventListener('click', function() {
+        showEditPlanModal(planId);
+    });
+
+    newViewButton.addEventListener('click', function() {
+        showViewPlanModal(planId);
+    });
+
+    newDeleteButton.addEventListener('click', function() {
+        deletePlan(planId);
+    });
+
+    // 显示成功提示
+    alert('添加种植规划成功！');
+
+    // 关闭模态框
+    hideAddPlanModal();
+});
+
+// 点击模态框外部关闭
+window.addEventListener('click', function(e) {
+    if (e.target.classList.contains('bg-black')) {
+        hideHandleModal();
+        hideAddPlanModal();
+    }
+});
+
+// 编辑种植计划功能
+function showEditPlanModal(planId) {
+    const modal = document.getElementById('edit-plan-modal');
+    modal.classList.remove('hidden');
+
+    // 获取计划数据（这里假设我们有一个存储计划数据的数组或对象）
+    // 实际应用中可能需要从后端API获取数据
+    const planData = getPlanDataById(planId);
+
+    // 填充表单数据
+    document.getElementById('edit-plan-id').value = planId;
+    document.getElementById('edit-plan-name').value = planData.planName;
+    document.getElementById('edit-crop-type-select').value = planData.cropType;
+    document.getElementById('edit-planting-area-input').value = planData.plantingArea;
+    document.getElementById('edit-planting-time').value = planData.plantingTime;
+    document.getElementById('edit-expected-harvest-time').value = planData.expectedHarvestTime;
+    document.getElementById('edit-estimated-yield-input').value = planData.expectedYield;
+
+    // 自动计算产量的事件监听
+    document.getElementById('edit-planting-area-input').addEventListener('input', function() {
+        const area = parseFloat(this.value);
+        const cropType = document.getElementById('edit-crop-type-select').value;
+
+        if (!isNaN(area) && cropType) {
+            // 单位面积产量（吨/亩）
+            const yieldMap = {
+                '水稻': 0.6,
+                '小麦': 0.5,
+                '玉米': 0.45,
+                '大豆': 0.15,
+                '棉花': 0.1
+            };
+            const estimated = (area * yieldMap[cropType]).toFixed(2);
+            document.getElementById('edit-estimated-yield-input').value = estimated;
+        } else {
+            document.getElementById('edit-estimated-yield-input').value = '';
+        }
+    });
+
+    // 作物类型改变时重新计算预估产量
+    document.getElementById('edit-crop-type-select').addEventListener('change', function() {
+        const areaInput = document.getElementById('edit-planting-area-input');
+        if (areaInput.value) {
+            areaInput.dispatchEvent(new Event('input'));
+        }
+    });
+}
+
+function hideEditPlanModal() {
+    const modal = document.getElementById('edit-plan-modal');
+    modal.classList.add('hidden');
+    document.getElementById('edit-plan-form').reset();
+}
+
+// 查看种植计划功能
+function showViewPlanModal(planId) {
+    const modal = document.getElementById('view-plan-modal');
+    modal.classList.remove('hidden');
+
+    // 获取计划数据（这里假设我们有一个存储计划数据的数组或对象）
+    // 实际应用中可能需要从后端API获取数据
+    const planData = getPlanDataById(planId);
+
+    // 填充查看模态框数据
+    document.getElementById('view-plan-name').textContent = planData.planName;
+    document.getElementById('view-crop-type').textContent = planData.cropType;
+    document.getElementById('view-planting-area').textContent = planData.plantingArea + ' 亩';
+    document.getElementById('view-planting-time').textContent = planData.plantingTime;
+    document.getElementById('view-expected-harvest-time').textContent = planData.expectedHarvestTime;
+    document.getElementById('view-estimated-yield').textContent = planData.expectedYield + ' 吨';
+    document.getElementById('view-planting-land').textContent = '1号地块, 2号地块'; // 示例数据
+    document.getElementById('view-plan-remark').textContent = planData.remark || '无备注';
+}
+
+function hideViewPlanModal() {
+    const modal = document.getElementById('view-plan-modal');
+    modal.classList.add('hidden');
+}
+
+// 模拟获取计划数据的函数（实际应用中可能需要从后端API获取）
+function getPlanDataById(planId) {
+    // 这里应该根据planId从数据库或API获取数据
+    // 这里使用模拟数据
+    return {
+        planName: document.getElementById('plan-table-body').querySelectorAll('tr')[planId-1].querySelector('td:first-child').textContent,
+        cropType: document.getElementById('plan-table-body').querySelectorAll('tr')[planId-1].querySelectorAll('td')[1].textContent,
+        plantingArea: parseFloat(document.getElementById('plan-table-body').querySelectorAll('tr')[planId-1].querySelectorAll('td')[2].textContent),
+        plantingTime: document.getElementById('plan-table-body').querySelectorAll('tr')[planId-1].querySelectorAll('td')[3].textContent.split(' 至 ')[0],
+        expectedHarvestTime: document.getElementById('plan-table-body').querySelectorAll('tr')[planId-1].querySelectorAll('td')[3].textContent.split(' 至 ')[1],
+        expectedYield: parseFloat(document.getElementById('plan-table-body').querySelectorAll('tr')[planId-1].querySelectorAll('td')[4].textContent),
+        remark: '这是一条备注信息'
+    };
+}
+// 编辑表单提交
+document.getElementById('edit-plan-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    // 获取表单数据
+    const planId = document.getElementById('edit-plan-id').value;
+    const planName = document.getElementById('edit-plan-name').value;
+    const cropType = document.getElementById('edit-crop-type-select').value;
+
+});
+
+// 删除种植规划函数
+function deletePlan(planId) {
+    if (confirm('确定要删除该种植规划吗？')) {
+        // 获取表格行
+        const tableBody = document.getElementById('plan-table-body');
+        const tableRow = tableBody.querySelectorAll('tr')[planId-1];
+
+        // 删除表格行
+        tableRow.remove();
+
+        // 更新农场信息
+        updateFarmInfo();
+
+        // 重新绑定所有按钮的事件监听
+        bindButtonEvents();
+
+        // 显示成功提示
+        alert('删除种植规划成功！');
+    }
+}
+
+// 重新绑定按钮事件监听函数
+function bindButtonEvents() {
+    // 获取表格体和所有行
+    const tableBody = document.getElementById('plan-table-body');
+    const rows = tableBody.querySelectorAll('tr');
+
+    // 为每一行重新绑定按钮事件
+    rows.forEach((row, index) => {
+        // 根据按钮的文本内容来识别不同功能的按钮
+        // 这样可以避免因按钮顺序或数量变化导致的问题
+        const editButton = row.querySelector('button.text-primary');
+        const viewButton = row.querySelector('button.text-gray-500');
+        const deleteButton = row.querySelector('button.text-red-500');
+
+        // 绑定编辑按钮事件
+        if (editButton) {
+            editButton.onclick = function() {
+                showEditPlanModal(index + 1);
+            };
+        }
+
+        // 绑定查看按钮事件
+        if (viewButton) {
+            viewButton.onclick = function() {
+                showViewPlanModal(index + 1);
+            };
+        }
+
+        // 绑定删除按钮事件
+        if (deleteButton) {
+            deleteButton.onclick = function() {
+                deletePlan(index + 1);
+            };
+        }
+    });
+}
+
+// 更新农场信息函数
+function updateFarmInfo() {
+    const tableBody = document.getElementById('plan-table-body');
+    const rows = tableBody.querySelectorAll('tr');
+
+    let totalArea = 0;
+    const cropTypes = new Set();
+
+    // 遍历所有种植规划，计算总种植面积和当前作物
+    rows.forEach(row => {
+        // 获取种植面积
+        const areaCell = row.querySelectorAll('td')[2];
+        const area = parseFloat(areaCell.textContent);
+        if (!isNaN(area)) {
+            totalArea += area;
+        }
+
+        // 获取作物类型
+        const cropCell = row.querySelectorAll('td')[1];
+        const cropType = cropCell.textContent;
+        if (cropType) {
+            cropTypes.add(cropType);
+        }
+    });
+
+    // 更新农场信息卡片
+    const farmInfoArea = document.querySelector('.bg-primary\\/5 .space-y-2 div:nth-child(1) span:last-child');
+    const farmInfoCrops = document.querySelector('.bg-primary\\/5 .space-y-2 div:nth-child(2) span:last-child');
+
+    if (farmInfoArea) {
+        farmInfoArea.textContent = totalArea.toFixed(1) + ' 亩';
+    }
+
+    if (farmInfoCrops) {
+        const cropTypesArray = Array.from(cropTypes);
+        farmInfoCrops.textContent = cropTypesArray.length > 0 ? cropTypesArray.join('、') : '无';
+    }
+}
+
+// DOMContentLoaded事件监听器 - 页面加载完成后执行
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('页面DOM加载完成');
+
+    // 1. 优先初始化导航功能 - 最关键的功能
+    console.log('开始初始化导航功能...');
+
+    const navLinks = document.querySelectorAll('aside nav a');
+    const sections = document.querySelectorAll('main section');
+
+    if (navLinks.length === 0) {
+        console.error('未找到导航链接元素');
+        return; // 终止执行，避免后续报错
+    }
+    if (sections.length === 0) {
+        console.error('未找到内容区域元素');
+        return; // 终止执行，避免后续报错
+    }
+
+    // 初始状态：激活第一个导航，显示第一个板块
+    navLinks[0].classList.add('nav-active');
+    const firstSectionId = navLinks[0].getAttribute('href').substring(1);
+    const firstSection = document.getElementById(firstSectionId);
+    if (firstSection) {
+        firstSection.classList.remove('section-hidden');
+    }
+
+    // 为每个导航链接绑定点击事件
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault(); // 阻止锚点跳转
+
+            // 1. 移除所有导航的激活状态
+            navLinks.forEach(nav => nav.classList.remove('nav-active'));
+            // 2. 激活当前导航
+            this.classList.add('nav-active');
+
+            // 3. 获取目标板块ID并显示
+            const targetId = this.getAttribute('href').substring(1);
+            const targetSection = document.getElementById(targetId);
+
+            // 容错：如果目标板块不存在，提示并终止
+            if (!targetSection) {
+                console.error(`未找到ID为 ${targetId} 的内容板块`);
+                return;
+            }
+
+            // 4. 隐藏所有板块，显示目标板块
+            sections.forEach(section => section.classList.add('section-hidden'));
+            targetSection.classList.remove('section-hidden');
+        });
+    });
+
+    console.log('导航功能初始化完成');
+
+    // 2. 初始化表格按钮事件
+    console.log('开始初始化表格按钮事件...');
+    try {
+        // 种植计划表格按钮事件
+        const planTableBody = document.getElementById('plan-table-body');
+        if (planTableBody) {
+            planTableBody.addEventListener('click', function(e) {
+                const target = e.target;
+                if (target.tagName === 'BUTTON') {
+                    const action = target.textContent.trim();
+                    console.log('表格按钮点击:', action);
+                    // 这里可以添加具体的按钮处理逻辑
+                }
+            });
+        }
+        console.log('表格按钮事件初始化完成');
+    } catch (bindError) {
+        console.error('绑定表格按钮事件失败:', bindError);
+    }
+
+
+    // 格式化时间函数 - 返回相对时间（如"1分钟前更新"）
+    function formatRelativeTime(date) {
+        const now = new Date();
+        const diffSeconds = Math.floor((now - date) / 1000);
+
+        if (diffSeconds < 60) {
+            return '刚刚更新';
+        } else if (diffSeconds < 3600) {
+            return `${Math.floor(diffSeconds / 60)}分钟前更新`;
+        } else {
+            return `${Math.floor(diffSeconds / 3600)}小时前更新`;
+        }
+    }
+
+    // 3. 加载数据
+    console.log('开始加载数据...');
+    loadPestWarnings(); // 加载病虫害预警
+    refreshHandleRecordsTable(); // 加载处理记录
+    console.log('数据加载完成');
+
+
+    // 格式化时间函数 - 返回具体时间（如"2024-05-20 14:32:15"）
+    function formatDateTime(date) {
+        return date.toLocaleString('zh-CN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+    }
+
+
+    // 4. 开始模拟实时数据更新
+    console.log('开始模拟实时数据更新...');
+    try {
+        setInterval(function() {
+            try {
+                // 更新土壤湿度
+                const humidityElement = document.getElementById('soil-humidity');
+                const realtimeHumidity = document.getElementById('realtime-humidity');
+                if (humidityElement && realtimeHumidity) {
+                    const newHumidity = (Math.random() * 10 + 70).toFixed(1) + '%';
+                    humidityElement.textContent = newHumidity;
+                    realtimeHumidity.textContent = newHumidity;
+                }
+
+                // 更新土壤温度
+                const temperatureElement = document.getElementById('soil-temperature');
+                const realtimeTemperature = document.getElementById('realtime-temperature');
+                if (temperatureElement && realtimeTemperature) {
+                    const newTemperature = (Math.random() * 5 + 25).toFixed(1) + '℃';
+                    temperatureElement.textContent = newTemperature;
+                    realtimeTemperature.textContent = newTemperature;
+                }
+            } catch (updateError) {
+                console.error('更新实时数据失败:', updateError);
+            }
+        }, 5000);
+        console.log('实时数据更新已启动');
+    } catch (intervalError) {
+        console.error('设置实时数据更新失败:', intervalError);
+    }
+
+    // 5. 初始化处理记录表格
+    console.log('开始初始化处理记录表格...');
+    try {
+        // refreshHandleRecordsTable();
+        console.log('处理记录表格初始化完成');
+    } catch (refreshError) {
+        console.error('初始化处理记录表格失败:', refreshError);
+    }
+
+    console.log('所有功能初始化完成');
+});
+</script>
+</body>
+</html>

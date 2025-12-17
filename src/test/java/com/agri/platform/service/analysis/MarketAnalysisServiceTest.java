@@ -2,7 +2,6 @@ package com.agri.platform.service.analysis;
 
 import com.agri.platform.entity.analysis.MarketAnalysis;
 import com.agri.platform.mapper.analysis.MarketAnalysisMapper;
-import com.agri.platform.util.analysis.MarketPriceUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

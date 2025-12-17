@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agri Platform - 智慧农业平台</title>
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Font Awesome图标 -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- 配置Tailwind自定义主题 -->
+    <script>
+        tailwind.config = {
+          theme: {
+            extend: {
+              colors: {
+                primary: '#22c55e', // 主色调：绿色（贴合农业主题）
+                secondary: '#16a34a', // 次要绿色
+                accent: '#f59e0b', // 强调色：橙色
+                dark: '#1f2937', // 深色文本
+                light: '#f9fafb', // 浅色背景
+              },
+              fontFamily: {
+                inter: ['Inter', 'system-ui', 'sans-serif'],
+              },
+            },
+          }
+        }
+    </script>
+    <!-- 自定义工具类 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+          .content-auto {
+            content-visibility: auto;
+          }
+          .text-shadow {
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          }
+          .card-hover {
+            @apply transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
+          }
+          .btn-primary {
+            @apply bg-primary hover:bg-secondary text-white font-medium py-2 px-6 rounded-full transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5;
+          }
+          .btn-outline {
+            @apply border-2 border-primary text-primary hover:bg-primary hover:text-white font-medium py-2 px-6 rounded-full transition-all duration-300;
+          }
+        }
+    </style>
+    <!-- 预加载字体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="font-inter bg-light text-dark antialiased">
+<!-- 导航栏 -->
+<header id="navbar" class="fixed w-full top-0 z-50 transition-all duration-300 bg-transparent">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center py-4">
+            <!-- Logo -->
+            <a href="#" class="flex items-center space-x-2">
+                <i class="fa fa-leaf text-primary text-2xl"></i>
+                <span class="text-xl font-bold text-white text-shadow">Agri Platform</span>
+            </a>
+
+            <!-- 桌面端导航 -->
+            <nav class="hidden md:flex items-center space-x-8">
+                <a href="#home" class="text-white hover:text-accent transition-colors duration-300 font-medium">首页</a>
+                <a href="#features" class="text-white hover:text-accent transition-colors duration-300 font-medium">功能</a>
+                <a href="#stats" class="text-white hover:text-accent transition-colors duration-300 font-medium">数据</a>
+                <a href="#testimonials" class="text-white hover:text-accent transition-colors duration-300 font-medium">案例</a>
+                <a href="#contact" class="text-white hover:text-accent transition-colors duration-300 font-medium">联系我们</a>
+            </nav>
+
+            <!-- 登录/注册按钮 -->
+            <div class="hidden md:flex items-center space-x-4">
+                <button class="btn-outline text-white border-white hover:bg-white hover:text-primary">登录</button>
+                <button class="btn-primary">免费注册</button>
+            </div>
+
+            <!-- 移动端菜单按钮 -->
+            <button id="menuBtn" class="md:hidden text-white text-2xl">
+                <i class="fa fa-bars"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- 移动端导航菜单 -->
+    <div id="mobileMenu" class="md:hidden bg-white shadow-lg absolute w-full left-0 top-full transform -translate-y-full opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="container mx-auto px-4 py-4 flex flex-col space-y-4">
+            <a href="#home" class="text-dark hover:text-primary transition-colors duration-300 font-medium py-2">首页</a>
+            <a href="#features" class="text-dark hover:text-primary transition-colors duration-300 font-medium py-2">功能</a>
+            <a href="#stats" class="text-dark hover:text-primary transition-colors duration-300 font-medium py-2">数据</a>
+            <a href="#testimonials" class="text-dark hover:text-primary transition-colors duration-300 font-medium py-2">案例</a>
+            <a href="#contact" class="text-dark hover:text-primary transition-colors duration-300 font-medium py-2">联系我们</a>
+            <div class="flex flex-col space-y-3 pt-2 border-t border-gray-100">
+                <button class="btn-outline w-full">登录</button>
+                <button class="btn-primary w-full">免费注册</button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- 英雄区 -->
+<section id="home" class="relative h-screen flex items-center justify-center overflow-hidden">
+    <!-- 背景图 -->
+    <div class="absolute inset-0 z-0">
+        <img src="https://picsum.photos/id/1059/1920/1080" alt="智慧农业背景" class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-gradient-to-r from-dark/70 to-dark/50"></div>
+    </div>
+
+    <!-- 内容 -->
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+        <h1 class="text-[clamp(2.5rem,5vw,4rem)] font-bold text-white leading-tight text-shadow mb-6 animate-fade-in">
+            科技赋能 <span class="text-primary">智慧农业</span>
+        </h1>
+        <p class="text-[clamp(1rem,2vw,1.25rem)] text-gray-100 max-w-3xl mx-auto mb-10 leading-relaxed">
+            基于物联网、大数据和AI技术，为农业生产提供全方位智能解决方案，提升产量、降低成本、绿色环保
+        </p>
+        <div class="flex flex-col sm:flex-row justify-center gap-4 mb-16">
+            <button class="btn-primary text-lg py-3 px-8">
+                立即体验 <i class="fa fa-arrow-right ml-2"></i>
+            </button>
+            <button class="btn-outline bg-transparent border-white text-white hover:bg-white hover:text-primary text-lg py-3 px-8">
+                <i class="fa fa-play-circle mr-2"></i> 观看演示
+            </button>
+        </div>
+
+        <!-- 滚动提示 -->
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
+            <a href="#features" class="text-white text-2xl">
+                <i class="fa fa-angle-down"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- 功能区 -->
+<section id="features" class="py-20 bg-white">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-[clamp(1.8rem,3vw,2.5rem)] font-bold text-dark mb-4">核心功能</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto text-lg">
+                全方位覆盖农业生产全流程，用科技助力农业现代化转型
+            </p>
+            <div class="w-24 h-1 bg-primary mx-auto mt-6 rounded-full"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- 功能卡片1 -->
+            <div class="bg-light rounded-2xl p-8 card-hover">
+                <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                    <i class="fa fa-tint text-primary text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-4">智能灌溉</h3>
+                <p class="text-gray-600 mb-6">
+                    基于土壤湿度传感器和天气预报，自动调节灌溉量和时间，节水30%以上
+                </p>
+                <a href="#" class="text-primary font-medium hover:underline flex items-center">
+                    了解更多 <i class="fa fa-long-arrow-right ml-2"></i>
+                </a>
+            </div>
+
+            <!-- 功能卡片2 -->
+            <div class="bg-light rounded-2xl p-8 card-hover">
+                <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                    <i class="fa fa-thermometer-half text-primary text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-4">环境监测</h3>
+                <p class="text-gray-600 mb-6">
+                    实时监测温度、湿度、光照、CO2浓度等环境数据，异常情况及时预警
+                </p>
+                <a href="#" class="text-primary font-medium hover:underline flex items-center">
+                    了解更多 <i class="fa fa-long-arrow-right ml-2"></i>
+                </a>
+            </div>
+
+            <!-- 功能卡片3 -->
+            <div class="bg-light rounded-2xl p-8 card-hover">
+                <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                    <i class="fa fa-bar-chart text-primary text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-4">数据分析</h3>
+                <p class="text-gray-600 mb-6">
+                    大数据分析作物生长规律，提供精准种植建议，优化生产决策
+                </p>
+                <a href="#" class="text-primary font-medium hover:underline flex items-center">
+                    了解更多 <i class="fa fa-long-arrow-right ml-2"></i>
+                </a>
+            </div>
+
+            <!-- 功能卡片4 -->
+            <div class="bg-light rounded-2xl p-8 card-hover">
+                <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                    <i class="fa fa-bug text-primary text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-4">病虫害预警</h3>
+                <p class="text-gray-600 mb-6">
+                    AI图像识别技术，快速检测病虫害，提供科学防治方案
+                </p>
+                <a href="#" class="text-primary font-medium hover:underline flex items-center">
+                    了解更多 <i class="fa fa-long-arrow-right ml-2"></i>
+                </a>
+            </div>
+
+            <!-- 功能卡片5 -->
+            <div class="bg-light rounded-2xl p-8 card-hover">
+                <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                    <i class="fa fa-map-marker text-primary text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-4">地块管理</h3>
+                <p class="text-gray-600 mb-6">
+                    数字化管理农田信息，记录种植历史，一键生成农事报告
+                </p>
+                <a href="#" class="text-primary font-medium hover:underline flex items-center">
+                    了解更多 <i class="fa fa-long-arrow-right ml-2"></i>
+                </a>
+            </div>
+
+            <!-- 功能卡片6 -->
+            <div class="bg-light rounded-2xl p-8 card-hover">
+                <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                    <i class="fa fa-mobile text-primary text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-4">移动管理</h3>
+                <p class="text-gray-600 mb-6">
+                    手机APP实时查看数据、远程控制设备，随时随地管理农田
+                </p>
+                <a href="#" class="text-primary font-medium hover:underline flex items-center">
+                    了解更多 <i class="fa fa-long-arrow-right ml-2"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 数据统计区 -->
+<section id="stats" class="py-16 bg-primary/5">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <!-- 统计项1 -->
+            <div class="text-center p-6 bg-white rounded-xl shadow-sm">
+                <div class="text-4xl font-bold text-primary mb-2 counter" data-target="12000">0</div>
+                <p class="text-gray-600">合作农户</p>
+            </div>
+
+            <!-- 统计项2 -->
+            <div class="text-center p-6 bg-white rounded-xl shadow-sm">
+                <div class="text-4xl font-bold text-primary mb-2 counter" data-target="850">0</div>
+                <p class="text-gray-600">覆盖农场</p>
+            </div>
+
+            <!-- 统计项3 -->
+            <div class="text-center p-6 bg-white rounded-xl shadow-sm">
+                <div class="text-4xl font-bold text-primary mb-2 counter" data-target="42">0</div>
+                <p class="text-gray-600">合作省份</p>
+            </div>
+
+            <!-- 统计项4 -->
+            <div class="text-center p-6 bg-white rounded-xl shadow-sm">
+                <div class="text-4xl font-bold text-primary mb-2 counter" data-target="35">0</div>
+                <p class="text-gray-600">产量提升(%)</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 产品展示区 -->
+<section class="py-20 bg-white">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col lg:flex-row items-center gap-12">
+            <div class="lg:w-1/2">
+                <h2 class="text-[clamp(1.8rem,3vw,2.5rem)] font-bold text-dark mb-6">
+                    智能硬件 + 软件平台 <br>
+                    <span class="text-primary">一站式解决方案</span>
+                </h2>
+                <p class="text-gray-600 mb-8 text-lg leading-relaxed">
+                    我们提供全套智能农业设备和云端管理平台，从传感器部署到数据分析，从远程控制到决策支持，全方位满足现代农业生产需求。
+                </p>
+
+                <div class="space-y-6 mb-8">
+                    <div class="flex items-start">
+                        <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mt-1 mr-4 flex-shrink-0">
+                            <i class="fa fa-check text-primary"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-lg mb-1">高精度传感器</h3>
+                            <p class="text-gray-600">数据采集精度达99%，稳定可靠，适应恶劣环境</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start">
+                        <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mt-1 mr-4 flex-shrink-0">
+                            <i class="fa fa-check text-primary"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-lg mb-1">低功耗设计</h3>
+<p class="text-gray-600">设备续航长达3年，无需频繁更换电池，降低维护成本</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start">
+                        <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mt-1 mr-4 flex-shrink-0">
+                            <i class="fa fa-check text-primary"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-lg mb-1">易用性设计</h3>
+                            <p class="text-gray-600">一键部署，傻瓜式操作，无需专业知识也能轻松使用</p>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn-primary">
+                    查看产品详情 <i class="fa fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+
+            <div class="lg:w-1/2 relative">
+                <div class="relative z-10 rounded-2xl overflow-hidden shadow-2xl transform rotate-2">
+                    <img src="https://picsum.photos/id/1076/800/600" alt="智能农业设备" class="w-full h-auto">
+                </div>
+                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-full bg-primary/20 rounded-2xl -rotate-3"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 用户评价区 -->
+<section id="testimonials" class="py-20 bg-light">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-[clamp(1.8rem,3vw,2.5rem)] font-bold text-dark mb-4">用户真实评价</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto text-lg">
+                来自全国各地农户和农场的真实反馈，见证科技带来的农业变革
+            </p>
+            <div class="w-24 h-1 bg-primary mx-auto mt-6 rounded-full"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- 评价卡片1 -->
+            <div class="bg-white rounded-2xl p-8 shadow-sm card-hover">
+                <div class="flex items-center mb-6">
+                    <img src="https://picsum.photos/id/1005/100/100" alt="用户头像" class="w-14 h-14 rounded-full object-cover mr-4">
+                    <div>
+                        <h4 class="font-semibold text-lg">张 farmer</h4>
+                        <p class="text-gray-500">山东·小麦种植户</p>
+                    </div>
+                </div>
+                <div class="text-yellow-400 mb-4">
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                </div>
+                <p class="text-gray-600 italic">
+                    "使用智能灌溉系统后，每亩地节水35%，人工成本降低了一半，小麦产量反而提高了20%。平台的数据报表非常直观，让我能精准掌握农田情况。"
+                </p>
+            </div>
+
+            <!-- 评价卡片2 -->
+            <div class="bg-white rounded-2xl p-8 shadow-sm card-hover">
+                <div class="flex items-center mb-6">
+                    <img src="https://picsum.photos/id/1012/100/100" alt="用户头像" class="w-14 h-14 rounded-full object-cover mr-4">
+                    <div>
+                        <h4 class="font-semibold text-lg">李经理</h4>
+                        <p class="text-gray-500">浙江·生态农场负责人</p>
+                    </div>
+                </div>
+                <div class="text-yellow-400 mb-4">
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star-half-o"></i>
+                </div>
+                <p class="text-gray-600 italic">
+                    "我们农场300亩地全部部署了这套系统，环境监测和病虫害预警功能非常实用，提前发现了几次病虫害风险，避免了重大损失。平台操作简单，员工很快就上手了。"
+                </p>
+            </div>
+
+            <!-- 评价卡片3 -->
+            <div class="bg-white rounded-2xl p-8 shadow-sm card-hover">
+                <div class="flex items-center mb-6">
+                    <img src="https://picsum.photos/id/1027/100/100" alt="用户头像" class="w-14 h-14 rounded-full object-cover mr-4">
+                    <div>
+                        <h4 class="font-semibold text-lg">王合作社</h4>
+                        <p class="text-gray-500">河南·农业合作社社长</p>
+                    </div>
+                </div>
+                <div class="text-yellow-400 mb-4">
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                </div>
+                <p class="text-gray-600 italic">
+                    "作为合作社，我们需要统一管理多个农户的田地。这个平台让我们实现了集中监控和统一调度，资源利用率大幅提升，农户的满意度也很高。客服响应及时，技术支持到位。"
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 联系区 -->
+<section id="contact" class="py-20 bg-white">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-primary/5 rounded-3xl p-8 md:p-12">
+            <div class="flex flex-col lg:flex-row gap-12">
+                <div class="lg:w-1/2">
+                    <h2 class="text-[clamp(1.8rem,3vw,2.5rem)] font-bold text-dark mb-6">
+                        联系我们，<br>
+                        <span class="text-primary">开启智慧农业之旅</span>
+                    </h2>
+                    <p class="text-gray-600 mb-8 text-lg leading-relaxed">
+                        无论您是个体农户、家庭农场还是大型农业企业，我们都能为您提供定制化的智能农业解决方案。填写表单或通过以下方式联系我们，专业顾问将为您提供一对一服务。
+                    </p>
+
+                    <div class="space-y-6 mb-8">
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mt-1 mr-4 flex-shrink-0">
+                                <i class="fa fa-map-marker text-primary text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-lg mb-1">公司地址</h3>
+                                <p class="text-gray-600">北京市海淀区中关村南大街5号</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mt-1 mr-4 flex-shrink-0">
+                                <i class="fa fa-phone text-primary text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-lg mb-1">联系电话</h3>
+                                <p class="text-gray-600">400-888-9999</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mt-1 mr-4 flex-shrink-0">
+                                <i class="fa fa-envelope text-primary text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-lg mb-1">电子邮箱</h3>
+                                <p class="text-gray-600">contact@agriplatform.com</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center hover:bg-primary hover:text-white transition-colors duration-300">
+                            <i class="fa fa-weixin text-primary text-xl"></i>
+                        </a>
+                        <a href="#" class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center hover:bg-primary hover:text-white transition-colors duration-300">
+                            <i class="fa fa-weibo text-primary text-xl"></i>
+                        </a>
+                        <a href="#" class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center hover:bg-primary hover:text-white transition-colors duration-300">
+                            <i class="fa fa-qq text-primary text-xl"></i>
+                        </a>
+                        <a href="#" class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center hover:bg-primary hover:text-white transition-colors duration-300">
+                            <i class="fa fa-youtube-play text-primary text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="lg:w-1/2">
+                    <form class="bg-white rounded-2xl p-8 shadow-sm">
+                        <h3 class="font-semibold text-xl mb-6">在线咨询</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+                            <div>
+                                <label for="name" class="block text-gray-700 mb-2">姓名</label>
+                                <input type="text" id="name" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-300" placeholder="请输入您的姓名">
+                            </div>
+                            <div>
+                                <label for="phone" class="block text-gray-700 mb-2">电话</label>
+                                <input type="tel" id="phone" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-300" placeholder="请输入您的电话">
+                            </div>
+                        </div>
+                        <div class="mb-6">
+                            <label for="email" class="block text-gray-700 mb-2">邮箱</label>
+                            <input type="email" id="email" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-300" placeholder="请输入您的邮箱">
+                        </div>
+                        <div class="mb-6">
+                            <label for="subject" class="block text-gray-700 mb-2">咨询主题</label>
+                            <select id="subject" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-300">
+                                <option value="">请选择咨询主题</option>
+                                <option value="product">产品咨询</option>
+                                <option value="price">价格咨询</option>
+                                <option value="installation">安装咨询</option>
+                                <option value="after-sales">售后服务</option>
+                                <option value="other">其他问题</option>
+                            </select>
+                        </div>
+                        <div class="mb-8">
+                            <label for="message" class="block text-gray-700 mb-2">留言内容</label>
+                            <textarea id="message" rows="4" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-300" placeholder="请输入您的留言内容"></textarea>
+                        </div>
+                        <button type="submit" class="btn-primary w-full">提交咨询</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 页脚 -->
+<footer class="bg-dark text-white py-12">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+            <div>
+                <div class="flex items-center space-x-2 mb-6">
+                    <i class="fa fa-leaf text-primary text-2xl"></i>
+                    <span class="text-xl font-bold">Agri Platform</span>
+                </div>
+                <p class="text-gray-400 mb-6">
+                    用科技赋能农业，让每一寸土地都实现价值最大化
+                </p>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-400 hover:text-primary transition-colors duration-300">
+                        <i class="fa fa-weixin text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-primary transition-colors duration-300">
+                        <i class="fa fa-weibo text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-primary transition-colors duration-300">
+                        <i class="fa fa-qq text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-primary transition-colors duration-300">
+                        <i class="fa fa-youtube-play text-xl"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div>
+                <h4 class="text-lg font-semibold mb-6">快速链接</h4>
+                <ul class="space-y-3">
+                    <li><a href="#home" class="text-gray-400 hover:text-primary transition-colors duration-300">首页</a></li>
+                    <li><a href="#features" class="text-gray-400 hover:text-primary transition-colors duration-300">功能介绍</a></li>
+                    <li><a href="#stats" class="text-gray-400 hover:text-primary transition-colors duration-300">数据统计</a></li>
+                    <li><a href="#testimonials" class="text-gray-400 hover:text-primary transition-colors duration-300">用户案例</a></li>
+                    <li><a href="#contact" class="text-gray-400 hover:text-primary transition-colors duration-300">联系我们</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="text-lg font-semibold mb-6">产品服务</h4>
+                <ul class="space-y-3">
+                    <li><a href="#" class="text-gray-400 hover:text-primary transition-colors duration-300">智能灌溉系统</a></li>
+                    <li><a href="#" class="text-gray-400 hover:text-primary transition-colors duration-300">环境监测设备</a></li>
+                    <li><a href="#" class="text-gray-400 hover:text-primary transition-colors duration-300">病虫害预警系统</a></li>
+                    <li><a href="#" class="text-gray-400 hover:text-primary transition-colors duration-300">农田管理平台</a></li>
+                    <li><a href="#" class="text-gray-400 hover:text-primary transition-colors duration-300">定制化解决方案</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="text-lg font-semibold mb-6">联系我们</h4>
+                <ul class="space-y-3">
+                    <li class="flex items-start">
+                        <i class="fa fa-map-marker text-primary mt-1 mr-3"></i>
+                        <span class="text-gray-400">北京市海淀区中关村南大街5号</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fa fa-phone text-primary mt-1 mr-3"></i>
+                        <span class="text-gray-400">400-888-9999</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fa fa-envelope text-primary mt-1 mr-3"></i>
+                        <span class="text-gray-400">contact@agriplatform.com</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fa fa-clock-o text-primary mt-1 mr-3"></i>
+                        <span class="text-gray-400">周一至周日 9:00-18:00</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
+            <p class="text-gray-500 mb-4 md:mb-0">© 2025 Agri Platform. 保留所有权利。</p>
+            <div class="flex space-x-6">
+                <a href="#" class="text-gray-500 hover:text-gray-300 transition-colors duration-300">隐私政策</a>
+                <a href="#" class="text-gray-500 hover:text-gray-300 transition-colors duration-300">服务条款</a>
+                <a href="#" class="text-gray-500 hover:text-gray-300 transition-colors duration-300">法律声明</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- 回到顶部按钮 -->
+<button id="backToTop" class="fixed bottom-8 right-8 bg-primary text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+    <i class="fa fa-arrow-up"></i>
+</button>
+
+<!-- JavaScript -->
+<script>
+    // 动态加载统计数据（从后端接口获取）
+    async function loadStats() {
+        try {
+            // 调用后端统计接口
+            const response = await fetch('/api/stats');
+            if (!response.ok) throw new Error('获取数据失败');
+
+            const stats = await response.json(); // 解析后端返回的JSON数据
+
+            // 更新统计区的目标数字（对接原有的计数动画）
+            const counters = document.querySelectorAll('.counter');
+            counters[0].setAttribute('data-target', stats.farmerCount || 12000);  // 合作农户（默认值12000）
+            counters[1].setAttribute('data-target', stats.farmCount || 850);    // 覆盖农场（默认值850）
+            counters[2].setAttribute('data-target', stats.provinceCount || 42); // 合作省份（默认值42）
+            counters[3].setAttribute('data-target', stats.yieldIncrease || 35); // 产量提升（默认值35）
+
+            // 重新执行计数动画
+            counters.forEach(counter => {
+                const target = parseInt(counter.getAttribute('data-target'));
+                let count = 0;
+                const increment = target / 30;
+                const updateCount = () => {
+                    count += increment;
+                    counter.innerText = count < target ? Math.ceil(count) : target;
+                    if (count < target) requestAnimationFrame(updateCount);
+                };
+                updateCount();
+            });
+        } catch (error) {
+            console.error('加载统计数据失败：', error);
+            // 失败时使用默认静态数据
+            document.querySelectorAll('.counter').forEach((counter, index) => {
+                const defaults = [12000, 850, 42, 35];
+                counter.innerText = defaults[index];
+            });
+        }
+    }
+
+    // 页面加载完成后，调用统计数据加载函数
+    window.addEventListener('load', loadStats);
+
+    // 导航栏滚动效果
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+            navbar.classList.add('bg-dark/95', 'shadow-lg');
+            navbar.classList.remove('bg-transparent');
+        } else {
+            navbar.classList.remove('bg-dark/95', 'shadow-lg');
+            navbar.classList.add('bg-transparent');
+        }
+    });
+
+    // 移动端菜单切换
+    const menuBtn = document.getElementById('menuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    menuBtn.addEventListener('click', () => {
+        if (mobileMenu.classList.contains('opacity-0')) {
+            mobileMenu.classList.remove('opacity-0', '-translate-y-full', 'pointer-events-none');
+            mobileMenu.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
+            menuBtn.innerHTML = '<i class="fa fa-times"></i>';
+        } else {
+            mobileMenu.classList.add('opacity-0', '-translate-y-full', 'pointer-events-none');
+            mobileMenu.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+            menuBtn.innerHTML = '<i class="fa fa-bars"></i>';
+        }
+    });
+
+    // 平滑滚动
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            // 关闭移动端菜单
+            if (!mobileMenu.classList.contains('opacity-0')) {
+                mobileMenu.classList.add('opacity-0', '-translate-y-full', 'pointer-events-none');
+                mobileMenu.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+                menuBtn.innerHTML = '<i class="fa fa-bars"></i>';
+            }
+
+            const targetId = this.getAttribute('href');
+            const targetElement = document.querySelector(targetId);
+            if (targetElement) {
+                window.scrollTo({
+                    top: targetElement.offsetTop - 80,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+
+    // 数字计数动画（初始加载用）
+    const counters = document.querySelectorAll('.counter');
+    const observerOptions = {
+        threshold: 0.5
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const counter = entry.target;
+                const target = parseInt(counter.getAttribute('data-target'));
+                let count = 0;
+                const increment = target / 30; // 分30步完成动画
+
+                const updateCount = () => {
+                    count += increment;
+                    if (count < target) {
+                        counter.innerText = Math.ceil(count);
+                        requestAnimationFrame(updateCount);
+                    } else {
+                        counter.innerText = target;
+                    }
+                };
+
+                updateCount();
+                observer.unobserve(counter);
+            }
+        });
+    }, observerOptions);
+
+    counters.forEach(counter => {
+        observer.observe(counter);
+    });
+
+    // 回到顶部按钮
+    const backToTopBtn = document.getElementById('backToTop');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) {
+            backToTopBtn.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+            backToTopBtn.classList.add('translate-y-0', 'opacity-100', 'pointer-events-auto');
+        } else {
+            backToTopBtn.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+            backToTopBtn.classList.remove('translate-y-0', 'opacity-100', 'pointer-events-auto');
+        }
+    });
+
+    backToTopBtn.addEventListener('click', () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+
+    // 表单提交（对接后端接口）
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault(); // 阻止表单默认刷新提交
+
+            // 1. 获取表单数据（和后端 Contact 实体类字段对应）
+            const formData = {
+                name: document.getElementById('name').value,    // 姓名
+                phone: document.getElementById('phone').value,  // 电话
+                email: document.getElementById('email').value,  // 邮箱
+                subject: document.getElementById('subject').value, // 咨询主题
+                message: document.getElementById('message').value  // 留言内容
+            };
+
+            // 2. 表单验证（必填字段不能为空）
+            if (!formData.name || !formData.phone || !formData.email) {
+                alert('姓名、电话、邮箱为必填字段，请填写完整！');
+                return;
+            }
+
+            // 3. 提交按钮加载状态（优化体验）
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.disabled = true; // 禁用按钮，防止重复提交
+            submitBtn.innerText = '提交中...';
+
+            try {
+                // 4. 调用后端接口（POST 方法，传 JSON 数据）
+                const response = await fetch('http://localhost:8080/api/contact', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json' // 告诉后端请求体是 JSON 格式
+                    },
+                    body: JSON.stringify(formData) // 把表单数据转为 JSON 字符串
+                });
+
+                // 5. 处理后端返回的结果
+                const result = await response.text();
+                if (response.ok) {
+                    alert(result); // 显示后端返回的成功提示
+                    form.reset(); // 清空表单
+                } else {
+                    alert('提交失败：' + result); // 显示后端返回的失败提示
+                }
+            } catch (error) {
+                alert('提交失败：请检查后端服务是否启动！');
+                console.error('接口调用错误：', error);
+            } finally {
+                // 6. 恢复按钮状态（无论成功/失败）
+                submitBtn.disabled = false;
+                submitBtn.innerText = '提交咨询';
+            }
+        });
+    }
+</script>
+</body>
+</html>

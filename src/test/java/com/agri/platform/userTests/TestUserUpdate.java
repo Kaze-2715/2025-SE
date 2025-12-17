@@ -39,11 +39,6 @@ public class TestUserUpdate {
                 TEST_UID,
                 "updated_name", // 只改用户名
                 null,
-                null,
-                null,
-                null,
-                null,
-                null,
                 null);
         // 发请求
         mockMvc.perform(
