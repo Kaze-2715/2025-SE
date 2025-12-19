@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>技术顾问 - 方案管理 | Agri Platform</title>
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Font Awesome图标 -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- 配置Tailwind自定义主题 -->
+    <script>
+        tailwind.config = {
+          theme: {
+            extend: {
+              colors: {
+                primary: '#22c55e',
+                secondary: '#16a34a',
+                accent: '#f59e0b',
+                dark: '#1f2937',
+                light: '#f9fafb',
+              },
+              fontFamily: {
+                inter: ['Inter', 'system-ui', 'sans-serif'],
+              },
+            },
+          }
+        }
+    </script>
+    <!-- 预加载字体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f0fdf4 0%, #f9fafb 100%);
+            min-height: 100vh;
+        }
+        .message-owner {
+            background-color: #f0f9ff;
+            border-left: 4px solid #3b82f6;
+        }
+        .message-advisor {
+            background-color: #f0fdf4;
+            border-left: 4px solid #22c55e;
+        }
+        .scrollbar-thin {
+            scrollbar-width: thin;
+            scrollbar-color: #22c55e transparent;
+        }
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 6px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background-color: #22c55e;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="font-inter text-dark">
+<!-- 导航栏 -->
+<header class="bg-dark/95 shadow-lg sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-4">
+        <div class="flex justify-between items-center">
+            <a href="homepage.html" class="flex items-center space-x-2">
+                <i class="fa fa-leaf text-primary text-2xl"></i>
+                <span class="text-xl font-bold text-white">Agri Platform</span>
+                <span class="text-gray-300 ml-4">| 技术顾问控制台</span>
+            </a>
+            <div class="flex items-center space-x-4">
+                <a href="homepage.html" class="text-white hover:text-primary transition-colors">
+                    <i class="fa fa-home mr-1"></i>返回首页
+                </a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- 主内容区 -->
+<main class="container mx-auto px-4 py-8">
+    <!-- 页面标题 -->
+    <div class="mb-10 text-center">
+        <h1 class="text-4xl font-bold text-dark mb-4">技术方案管理</h1>
+        <p class="text-gray-600 max-w-2xl mx-auto">
+            为农场主提供专业种植建议，通过即时沟通优化农业生产方案
+        </p>
+        <div class="w-24 h-1 bg-primary mx-auto mt-6 rounded-full"></div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- 左侧：土地选择和详情 -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-2xl shadow-lg p-8">
+                <h2 class="text-2xl font-bold text-dark mb-6 flex items-center">
+                    <i class="fa fa-map-marker text-primary mr-3"></i>选择土地
+                </h2>
+
+                <div class="mb-6">
+                    <label class="block text-gray-700 mb-3 font-medium">选择要服务的土地</label>
+                    <select id="landSelect"
+                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all">
+                        <option value="">请选择土地...</option>
+                    </select>
+                </div>
+
+                <!-- 土地详情 -->
+                <div id="landDetail" class="bg-light rounded-xl p-6 mb-8">
+                    <div class="text-center py-8">
+                        <i class="fa fa-map-o text-4xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-500">请从左侧选择一块土地</p>
+                    </div>
+                </div>
+
+                <!-- 提交方案表单 -->
+                <div class="bg-primary/5 rounded-xl p-6">
+                    <h3 class="text-xl font-bold text-dark mb-4 flex items-center">
+                        <i class="fa fa-edit text-primary mr-3"></i>提交技术方案
+                    </h3>
+
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2 font-medium">顾问姓名</label>
+                        <input id="advisorName"
+                               class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                               placeholder="请输入您的姓名">
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-gray-700 mb-2 font-medium">方案内容</label>
+                        <textarea id="adviceContent" rows="6"
+                                  class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none"
+                                  placeholder="请输入详细的技术方案和建议..."></textarea>
+                    </div>
+
+                    <button id="submitAdvice"
+                            class="w-full bg-primary hover:bg-secondary text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:-translate-y-0.5 shadow-md hover:shadow-lg">
+                        <i class="fa fa-paper-plane mr-2"></i>提交方案
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧：沟通记录 -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-2xl shadow-lg p-8 h-full">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-2xl font-bold text-dark flex items-center">
+                        <i class="fa fa-comments text-primary mr-3"></i>沟通记录
+                    </h2>
+                    <div class="text-sm text-gray-500" id="currentLandInfo"></div>
+                </div>
+
+                <!-- 消息列表 -->
+                <div id="messages" class="space-y-4 mb-8 max-h-[400px] overflow-y-auto p-4 border border-gray-100 rounded-lg scrollbar-thin">
+                    <div class="text-center py-12 text-gray-400">
+                        <i class="fa fa-commenting-o text-4xl mb-4"></i>
+                        <p>选择土地后显示沟通记录</p>
+                    </div>
+                </div>
+
+                <!-- 发送消息 -->
+                <div class="bg-light rounded-xl p-6">
+                    <h3 class="font-bold text-dark mb-4">发送新消息</h3>
+                    <div class="flex gap-4">
+                        <div class="flex-1">
+                            <input id="msgText"
+                                   class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                                   placeholder="输入消息内容...">
+                        </div>
+                        <button id="sendMsg"
+                                class="bg-primary hover:bg-secondary text-white font-semibold py-3 px-8 rounded-lg transition-colors whitespace-nowrap">
+                            <i class="fa fa-send mr-2"></i>发送
+                        </button>
+                    </div>
+                    <div class="mt-4 text-sm text-gray-500 flex items-center">
+                        <i class="fa fa-info-circle mr-2"></i>
+                        消息将实时同步到农场主的控制台
+                    </div>
+                </div>
+
+                <!-- 历史方案 -->
+                <div class="mt-8">
+                    <h3 class="text-xl font-bold text-dark mb-4 flex items-center">
+                        <i class="fa fa-history text-primary mr-3"></i>历史技术方案
+                    </h3>
+                    <div id="adviceHistory" class="bg-light rounded-xl p-6">
+                        <div class="text-center py-8 text-gray-400">
+                            <i class="fa fa-file-text-o text-3xl mb-4"></i>
+                            <p>暂无历史方案记录</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    const landsApi = '/api/lands';
+    const adviceApi = '/api/advice';
+    let currentLandId = null;
+
+    // 加载所有土地
+    async function loadLands() {
+        try {
+            const res = await fetch(landsApi);
+            const arr = await res.json();
+            const select = document.getElementById('landSelect');
+            select.innerHTML = '<option value="">请选择土地...</option>';
+
+            arr.forEach(land => {
+                const option = document.createElement('option');
+                option.value = land.id;
+                option.text = `${land.landId} | ${land.area}㎡ | ${land.soilType}`;
+                select.appendChild(option);
+            });
+
+            if (arr.length > 0) {
+                showLand(arr[0].id);
+                select.value = arr[0].id;
+            }
+        } catch (error) {
+            console.error('加载土地失败:', error);
+        }
+    }
+
+    // 显示土地详情
+    async function showLand(id) {
+        currentLandId = id;
+        try {
+            const res = await fetch(landsApi + '/' + id);
+            const land = await res.json();
+
+            document.getElementById('landDetail').innerHTML = `
+                <div class="space-y-4">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mr-4">
+                            <i class="fa fa-map text-primary text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg text-dark">${land.landId}</h3>
+                            <p class="text-sm text-gray-500">ID: ${land.id}</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-light rounded-lg p-4">
+                            <p class="text-sm text-gray-500 mb-1">土地面积</p>
+                            <p class="font-semibold text-lg">${land.area} ㎡</p>
+                        </div>
+                        <div class="bg-light rounded-lg p-4">
+                            <p class="text-sm text-gray-500 mb-1">土壤类型</p>
+                            <p class="font-semibold text-lg">${land.soilType}</p>
+                        </div>
+                    </div>
+
+                    ${land.attachmentPath ? `
+                        <div class="pt-4 border-t">
+                            <a href="${land.attachmentPath}" target="_blank"
+                               class="inline-flex items-center text-primary hover:text-secondary">
+                                <i class="fa fa-paperclip mr-2"></i>
+                                查看土地附件
+                            </a>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+
+            document.getElementById('currentLandInfo').innerHTML =
+                `当前土地: <span class="font-semibold">${land.landId}</span>`;
+
+            loadAdvice(id);
+            loadMessages(id);
+
+        } catch (error) {
+            console.error('加载土地详情失败:', error);
+        }
+    }
+
+    // 加载技术方案
+    async function loadAdvice(landDbId) {
+        try {
+            const res = await fetch(`${adviceApi}/land/${landDbId}`);
+            const arr = await res.json();
+            const container = document.getElementById('adviceHistory');
+
+            if (arr.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-400">
+                        <i class="fa fa-file-text-o text-3xl mb-4"></i>
+                        <p>暂无历史方案记录</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+            arr.forEach(advice => {
+                const date = new Date(advice.createdAt).toLocaleString('zh-CN');
+                const div = document.createElement('div');
+                div.className = 'bg-white rounded-lg p-6 mb-4 border border-gray-100';
+                div.innerHTML = `
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <span class="font-semibold text-dark">${advice.advisorName}</span>
+                            <span class="text-sm text-gray-500 ml-3">顾问</span>
+                        </div>
+                        <span class="text-sm text-gray-500">${date}</span>
+                    </div>
+                    <div class="text-gray-700 leading-relaxed whitespace-pre-wrap bg-light/50 p-4 rounded">
+                        ${advice.content}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+        } catch (error) {
+            console.error('加载方案失败:', error);
+        }
+    }
+
+    // 加载消息记录
+    async function loadMessages(landDbId) {
+        try {
+            const res = await fetch(`${adviceApi}/messages/${landDbId}`);
+            const arr = await res.json();
+            const container = document.getElementById('messages');
+
+            if (arr.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 text-gray-400">
+                        <i class="fa fa-commenting-o text-4xl mb-4"></i>
+                        <p>暂无沟通记录</p>
+                        <p class="text-sm mt-2">开始与农场主交流吧</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+            arr.forEach(msg => {
+                const date = new Date(msg.createdAt).toLocaleString('zh-CN');
+                const isAdvisor = msg.sender === 'advisor';
+                const div = document.createElement('div');
+                div.className = `p-4 rounded-lg ${isAdvisor ? 'message-advisor' : 'message-owner'}`;
+                div.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full ${isAdvisor ? 'bg-primary/10' : 'bg-blue-100'} flex items-center justify-center mr-3">
+                                <i class="fa ${isAdvisor ? 'fa-user-md text-primary' : 'fa-user text-blue-500'}"></i>
+                            </div>
+                            <span class="font-semibold">${msg.sender === 'advisor' ? '技术顾问' : '农场主'}</span>
+                        </div>
+                        <span class="text-sm text-gray-500">${date}</span>
+                    </div>
+                    <div class="text-gray-700 ml-11">${msg.text}</div>
+                `;
+                container.appendChild(div);
+            });
+
+            // 滚动到底部
+            container.scrollTop = container.scrollHeight;
+
+        } catch (error) {
+            console.error('加载消息失败:', error);
+        }
+    }
+
+    // 土地选择事件
+    document.getElementById('landSelect').addEventListener('change', e => {
+        if (e.target.value) {
+            showLand(e.target.value);
+        }
+    });
+
+    // 提交技术方案
+    document.getElementById('submitAdvice').addEventListener('click', async () => {
+        const landId = document.getElementById('landSelect').value;
+        const advisorName = document.getElementById('advisorName').value.trim();
+        const content = document.getElementById('adviceContent').value.trim();
+        const submitBtn = document.getElementById('submitAdvice');
+
+        if (!landId) {
+            showNotification('请先选择一块土地', 'error');
+            return;
+        }
+        if (!advisorName) {
+            showNotification('请输入顾问姓名', 'error');
+            return;
+        }
+        if (!content) {
+            showNotification('请输入方案内容', 'error');
+            return;
+        }
+
+        const originalText = submitBtn.innerHTML;
+        try {
+            submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin mr-2"></i>提交中...';
+            submitBtn.disabled = true;
+
+            const payload = {
+                landDbId: Number(landId),
+                advisorName,
+                content
+            };
+
+            const res = await fetch(adviceApi, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                showNotification('方案提交成功！', 'success');
+                document.getElementById('adviceContent').value = '';
+                loadAdvice(landId);
+
+                // 自动发送一条系统消息
+                const msgPayload = {
+                    landDbId: Number(landId),
+                    sender: 'advisor',
+                    text: `${advisorName} 提交了新的技术方案，请查看。`
+                };
+                await fetch(adviceApi + '/message', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(msgPayload)
+                });
+
+                // 重新加载消息
+                loadMessages(landId);
+
+            } else {
+                throw new Error('提交失败');
+            }
+        } catch (error) {
+            showNotification('提交失败，请重试', 'error');
+        } finally {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    });
+
+    // 发送消息
+    document.getElementById('sendMsg').addEventListener('click', async () => {
+        const landId = document.getElementById('landSelect').value;
+        const text = document.getElementById('msgText').value.trim();
+        const sendBtn = document.getElementById('sendMsg');
+
+        if (!landId) {
+            showNotification('请先选择一块土地', 'error');
+            return;
+        }
+        if (!text) {
+            showNotification('请输入消息内容', 'error');
+            return;
+        }
+
+        const originalText = sendBtn.innerHTML;
+        try {
+            sendBtn.innerHTML = '<i class="fa fa-spinner fa-spin mr-2"></i>';
+            sendBtn.disabled = true;
+
+            const payload = {
+                landDbId: Number(landId),
+                sender: 'advisor',
+                text
+            };
+
+            const res = await fetch(adviceApi + '/message', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                document.getElementById('msgText').value = '';
+                loadMessages(landId);
+
+                // 输入框自动聚焦
+                document.getElementById('msgText').focus();
+            } else {
+                throw new Error('发送失败');
+            }
+        } catch (error) {
+            showNotification('发送失败，请重试', 'error');
+        } finally {
+            sendBtn.innerHTML = '<i class="fa fa-send mr-2"></i>发送';
+            sendBtn.disabled = false;
+        }
+    });
+
+    // 回车发送消息
+    document.getElementById('msgText').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            document.getElementById('sendMsg').click();
+        }
+    });
+
+    // 显示通知
+    function showNotification(message, type = 'success') {
+        const colors = {
+            success: 'bg-green-500',
+            error: 'bg-red-500',
+            info: 'bg-blue-500'
+        };
+
+        const div = document.createElement('div');
+        div.className = `fixed top-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in`;
+        div.innerHTML = `
+            <i class="fa ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} mr-2"></i>
+            ${message}
+        `;
+        document.body.appendChild(div);
+
+        setTimeout(() => {
+            div.remove();
+        }, 3000);
+    }
+
+    // 初始化
+    loadLands();
+</script>
+</body>
+</html>
