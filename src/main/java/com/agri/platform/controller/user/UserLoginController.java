@@ -14,6 +14,7 @@ import com.agri.platform.service.user.UserLoginService;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,8 +36,10 @@ public class UserLoginController {
             loginDTO = new UserLoginDTO(loginDTO.login(), loginDTO.password(), loginDTO.type(), clientIp);
 
             User user = loginService.loginUser(loginDTO, request);
+            List<String> roles = loginService.getRoleOfUser(user.getUserId());
+            List<String> permissions = loginService.getPermissionsOfUser(user.getUserId());
 
-            LoginResponse response = new LoginResponse(user.getUserId(), user.getUsername(), user.getEmail(), user.getPhoneNumber(), user.getLastLoginTime(), "登录成功");
+            LoginResponse response = new LoginResponse(user.getUserId(), user.getUsername(), user.getEmail(), user.getPhoneNumber(), user.getLastLoginTime(), roles , permissions, "登录成功");
             return ResponseEntity.ok(response);
         } catch (BizException e) {
             log.warn("登录业务异常：{}", e.getMessage());
@@ -70,6 +73,8 @@ public class UserLoginController {
             String email,
             String phoneNumber,
             LocalDateTime lastLoginTime,
+            List<String> role,
+            List<String> permissions,
             String message) {
     }
     

@@ -1,0 +1,109 @@
+<!-- main.html -->
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8" />
+    <title>智慧农业 - 主控制台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        /* 让 iframe 撑满剩余高度 */
+        #content-frame {
+            width: 100%;
+            height: calc(100vh - 64px);
+            /* 减去顶部栏高度 */
+            border: none;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+    <!-- 顶部统一导航 -->
+    <header class="shadow-lg sticky top-0 z-50" style="background-color: rgba(31,41,55,.95);">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <!-- 左侧图标 + 文字（完全照搬） -->
+                <a href="homepage.html" class="flex items-center space-x-2">
+                    <i class="fa fa-leaf text-2xl" style="color:#22c55e !important"></i>
+                    <span class="text-xl font-bold text-white">Agri Platform</span>
+                    <span class="text-gray-300 ml-4">| 智慧农业控制台</span>
+                </a>
+
+                <!-- 中间一排按钮 -->
+                <nav class="flex space-x-2">
+                    <button onclick="showPage('/planning-mgmt.html')"
+                        class="px-3 py-1.5 rounded hover:bg-primary/20 text-white hover:text-primary transition-colors">种植监控</button>
+                    <button onclick="showPage('/user-mgmt.html')"
+                        class="px-3 py-1.5 rounded hover:bg-primary/20 text-white hover:text-primary transition-colors">用户中心</button>
+                    <button onclick="showPage('/yield-market.html')"
+                        class="px-3 py-1.5 rounded hover:bg-primary/20 text-white hover:text-primary transition-colors">产量市场</button>
+                    <button onclick="showPage('/farm_owner2.html')"
+                        class="px-3 py-1.5 rounded hover:bg-primary/20 text-white hover:text-primary transition-colors">土地管理</button>
+                    <button onclick="showPage('/tech_advisor2.html')"
+                        class="px-3 py-1.5 rounded hover:bg-primary/20 text-white hover:text-primary transition-colors">技术顾问</button>
+                </nav>
+
+                <!-- 右侧头像下拉 -->
+                <div class="relative flex items-center space-x-2 group">
+                    <div class="flex items-center space-x-2 cursor-pointer">
+                        <img src="https://picsum.photos/id/1005/40/40" alt="头像"
+                            class="w-8 h-8 rounded-full object-cover">
+                        <span class="text-sm font-medium text-white" id="top-username">农场主A</span>
+                    </div>
+                    <div
+                        class="hidden group-hover:block absolute right-0 top-full w-48 bg-white rounded-xl shadow-lg p-3 z-50 flex flex-col gap-2">
+                        <button id="go-profile"
+                            class="w-full bg-primary hover:bg-primary/90 text-white text-sm py-2 rounded">完善信息</button>
+                        <button id="logout-btn"
+                            class="w-full border border-gray-300 hover:border-primary hover:text-primary text-sm py-2 rounded">退出登录</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 内容容器：用 iframe 嵌入各个子页面 -->
+    <iframe id="content-frame" src="/planning-mgmt.html" class="pt-4 pb-4"></iframe>
+
+    <script>
+        /* 读取登录态（示例） */
+        window.addEventListener('DOMContentLoaded', () => {
+            const uname = localStorage.getItem('uname');
+            if (uname) document.getElementById('top-username').textContent = uname;
+        });
+        /* 切换页面 */
+        function showPage(page) {
+            const iframe = document.getElementById('content-frame');
+            const uid = localStorage.getItem('uid');
+            const uname = localStorage.getItem('uname');
+            if (!uid) {
+                location.href = '/user-mgmt.html';
+                return;
+            }
+
+            /* 1. 先设地址 */
+            const target = page.endsWith('user-mgmt.html') ? page + '#role' : page;
+            iframe.src = target;
+
+            /* 2. 等 iframe 加载完再发消息 */
+            iframe.onload = () => {
+                // 必须用 contentWindow，且等加载完
+                iframe.contentWindow.postMessage(
+                    { action: 'setLogin', uid: uid, uname: uname },
+                    '*'   // 或写精确 origin：'http://yourdomain.com'
+                );
+            };
+        }
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            localStorage.clear();
+            location.reload();
+        });
+        document.getElementById('go-profile').addEventListener('click', () => {
+            document.getElementById('content-frame').src = 'user-mgmt.html#profile';
+        });
+    </script>
+</body>
+
+</html>

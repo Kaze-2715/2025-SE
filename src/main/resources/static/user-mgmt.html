@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智慧农业 - 用户中心</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style type="text/tailwindcss">
+        .card-shadow { box-shadow: 0 4px 20px rgba(0,0,0,.08); }
+        .btn-primary { @apply bg-green-500 text-white font-medium py-2 px-4 rounded hover:bg-green-600 transition; }
+        .btn-outline { @apply border border-gray-300 font-medium py-2 px-4 rounded hover:border-green-500 hover:text-green-500 transition; }
+        .section-hidden { display: none !important; }
+    </style>
+</head>
+
+<body class="bg-gray-50 font-sans text-dark">
+    <!-- 顶部导航（被 iframe 嵌套时会被隐藏） -->
+    <header class="bg-white shadow-sm fixed top-0 left-0 right-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-leaf text-green-500 text-2xl"></i>
+                <h1 class="text-xl font-bold">智慧农业种植监控系统</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <i id="alert-bell" class="fa fa-bell text-gray-600 cursor-pointer"></i>
+                    <span id="alert-dot"
+                        class="absolute -top-1 -right-1 w-2 h-2 bg-orange-500 rounded-full hidden"></span>
+                </div>
+                <div class="relative flex items-center space-x-2 group">
+                    <img src="https://picsum.photos/id/1005/40/40" alt="用户头像" class="w-8 h-8 rounded-full object-cover">
+                    <span class="text-sm font-medium" id="top-username">游客</span>
+                    <div
+                        class="hidden group-hover:block absolute right-0 top-full w-48 bg-white rounded-xl card-shadow p-3 z-50 flex flex-col gap-2">
+                        <button id="go-profile" class="btn-primary w-full text-sm">完善信息</button>
+                        <button id="logout-btn" class="btn-outline w-full text-sm">退出登录</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <div id="main-container" class="container mx-auto px-4 pt-24 pb-16 flex flex-col md:flex-row gap-6">
+        <!-- 左侧导航 -->
+        <aside class="md:w-64 bg-white rounded-xl card-shadow p-4 flex-shrink-0">
+            <nav class="space-y-1">
+                <a href="#profile" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-50"><i
+                        class="fa fa-user-circle"></i><span>完善信息</span></a>
+                <a href="#role" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-50"><i
+                        class="fa fa-users"></i><span>角色权限</span></a>
+            </nav>
+        </aside>
+
+        <!-- 右侧内容区 -->
+        <main class="flex-1 space-y-8">
+            <!-- 完善信息 -->
+            <section id="profile" class="bg-white rounded-xl card-shadow p-6 section-hidden">
+                <h2 class="text-xl font-bold mb-4">完善用户信息</h2>
+                <form id="profile-form" class="max-w-md space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">用户名</label>
+                        <input type="text" id="prof-username" placeholder="选填"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">邮箱</label>
+                        <input type="email" id="prof-email" placeholder="选填"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">手机号</label>
+                        <input type="tel" id="prof-phone" placeholder="选填"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                    </div>
+                    <button type="submit" class="btn-primary">保存</button>
+                </form>
+            </section>
+
+            <!-- 角色权限 -->
+            <section id="role" class="bg-white rounded-xl card-shadow p-6 section-hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold">角色与权限管理</h2>
+                    <div class="space-x-2">
+                        <button id="add-role-btn" class="btn-primary text-sm">添加角色</button>
+                        <button id="add-perm-btn" class="btn-outline text-sm">添加权限</button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="font-medium mb-2">用户-角色</h3>
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">用户名</th>
+                                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">当前角色</th>
+                                </tr>
+                            </thead>
+                            <tbody id="user-role-tbody" class="bg-white divide-y divide-gray-200"></tbody>
+                        </table>
+                    </div>
+                    <div>
+                        <h3 class="font-medium mb-2">权限列表</h3>
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">权限</th>
+                                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="perm-tbody" class="bg-white divide-y divide-gray-200"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="mt-6">
+                    <h3 class="font-medium mb-2">为用户分配角色</h3>
+                    <div class="flex space-x-2">
+                        <input type="text" id="grant-user" placeholder="用户ID"
+                            class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <input type="text" id="grant-role" placeholder="角色名"
+                            class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <button id="grant-btn" class="btn-primary">分配</button>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <h3 class="font-medium mb-2">为角色绑定权限</h3>
+                    <div class="flex space-x-2">
+                        <input type="text" id="bind-role" placeholder="角色名"
+                            class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <input type="text" id="bind-perm" placeholder="权限名"
+                            class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <button id="bind-btn" class="btn-primary">绑定</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="bg-white border-t border-gray-200 py-4">
+        <div class="container mx-auto px-4 text-center text-sm text-gray-500">
+            <p>© 2025 智慧农业种植监控系统 - 版权所有</p>
+        </div>
+    </footer>
+
+    <script>
+        /* --------------  通用工具  -------------- */
+        const $api = async (url, opts = {}) => {
+            const res = await fetch(url, { ...opts, headers: { 'Content-Type': 'application/json', ...opts.headers } });
+            if (!res.ok) throw new Error(await res.text());
+            return res.json();
+        };
+        function toast(msg, bg = 'bg-green-500') {
+            const box = document.createElement('div');
+            box.className = `fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white px-6 py-3 rounded-lg shadow-xl ${bg} z-50`;
+            box.textContent = msg;
+            document.body.appendChild(box);
+            setTimeout(() => (box.style.opacity = '0'), 2500);
+            setTimeout(() => box.remove(), 2800);
+        }
+
+        /* --------------  顶部按钮事件（可选绑定）  -------------- */
+        const logoutBtn = document.getElementById('logout-btn');
+        const goProfile = document.getElementById('go-profile');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                localStorage.removeItem('uid');
+                localStorage.removeItem('uname');
+                toast('已退出');
+                location.reload();
+            });
+        }
+        if (goProfile) {
+            goProfile.addEventListener('click', () => {
+                location.hash = 'profile';
+            });
+        }
+        const topUname = document.getElementById('top-username');
+        if (topUname && localStorage.getItem('uname')) {
+            topUname.textContent = localStorage.getItem('uname');
+        }
+
+        /* --------------  被 iframe 嵌套时隐藏顶部 header  -------------- */
+        if (window.self !== window.top) {
+            const header = document.querySelector('header');
+            if (header) {
+                header.style.position = 'absolute';
+                header.style.visibility = 'hidden';
+                header.style.height = '0';
+                header.style.overflow = 'hidden';
+            }
+            document.body.classList.add('pt-0');
+        }
+
+        /* --------------  路由切换  -------------- */
+        const navs = document.querySelectorAll('aside nav a');
+        const sections = document.querySelectorAll('main section');
+        navs.forEach(n => n.addEventListener('click', e => {
+            e.preventDefault();
+            const id = n.getAttribute('href').slice(1);
+            navs.forEach(x => x.classList.remove('nav-active'));
+            n.classList.add('nav-active');
+            sections.forEach(s => s.classList.add('section-hidden'));
+            document.getElementById(id).classList.remove('section-hidden');
+        }));
+
+        /* --------------  默认高亮并进入角色权限页  -------------- */
+        location.hash = 'role';
+        navs[1]?.classList.add('nav-active');   // 让“角色权限”按钮高亮（navs[1] 是第二项）
+
+        /* --------------  完善信息  -------------- */
+        document.getElementById('profile-form').addEventListener('submit', async e => {
+            e.preventDefault();
+            const uid = localStorage.getItem('uid');
+            if (!uid) return toast('请先登录', 'bg-orange-500');
+            const dto = {
+                userId: uid,
+                username: document.getElementById('prof-username').value,
+                email: document.getElementById('prof-email').value,
+                phoneNumber: document.getElementById('prof-phone').value
+            };
+            try {
+                const res = await fetch('/api/user/update', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dto) });
+                if (!res.ok) throw new Error(await res.text());
+                toast('保存成功');
+            } catch (err) {
+                toast('保存失败：' + err.message, 'bg-red-500');
+            }
+        });
+
+        /* --------------  角色权限  -------------- */
+        async function loadUserRoles() {
+            try {
+                const list = await $api('/api/user/user-roles');
+                const utbody = document.getElementById('user-role-tbody');
+                utbody.innerHTML = list.map(r => `
+                    <tr>
+                        <td class="px-3 py-2 text-sm">${r.userId}</td>
+                        <td class="px-3 py-2 text-sm">${r.username}</td>
+                        <td class="px-3 py-2 text-sm">${r.roleName}</td>
+                        <td class="px-3 py-2 text-sm space-x-1">
+                            <button class="text-green-600 hover:underline text-xs" onclick="changeRole('${r.userId}')">更换角色</button>
+                        </td>
+                    </tr>`).join('');
+            } catch (e) {
+                toast('用户-角色加载失败：' + e.message, 'bg-red-500');
+            }
+
+            try {
+                const perms = await fetch('/api/user/permissions').then(r => r.ok ? r.json() : Promise.reject(r));
+                const ptbody = document.getElementById('perm-tbody');
+                ptbody.innerHTML = perms.map(p => `
+                    <tr>
+                        <td class="px-3 py-2 text-sm">${p}</td>
+                        <td class="px-3 py-2 text-sm space-x-1">
+                            <button class="text-green-600 hover:underline text-xs" onclick="delPerm('${p}')">删除</button>
+                        </td>
+                    </tr>`).join('');
+            } catch (e) {
+                toast('权限加载失败：' + e.message, 'bg-red-500');
+            }
+        }
+
+        document.getElementById('add-role-btn').addEventListener('click', async () => {
+            const name = prompt('请输入新角色名');
+            if (!name) return;
+            try { await $api('/api/user/role?roleName=' + name + '&description=', { method: 'POST' }); toast('添加成功'); loadUserRoles(); } catch (e) { toast('添加失败：' + e.message); }
+        });
+        document.getElementById('add-perm-btn').addEventListener('click', async () => {
+            const name = prompt('请输入新权限名');
+            if (!name) return;
+            try { await $api('/api/user/permission?permissionName=' + name + '&description=', { method: 'POST' }); toast('添加成功'); loadUserRoles(); } catch (e) { toast('添加失败：' + e.message); }
+        });
+        document.getElementById('grant-btn').addEventListener('click', async () => {
+            const uid = document.getElementById('grant-user').value;
+            const rname = document.getElementById('grant-role').value;
+            if (!uid || !rname) return toast('请输入用户ID和角色名', 'bg-orange-500');
+            const res = await fetch('/api/user/user-role?userId=' + uid + '&roleName=' + rname, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+            res.ok ? (toast('分配成功'), loadUserRoles()) : toast('分配失败：' + res.status, 'bg-red-500');
+        });
+        document.getElementById('bind-btn').addEventListener('click', async () => {
+            const rname = document.getElementById('bind-role').value;
+            const pname = document.getElementById('bind-perm').value;
+            if (!rname || !pname) return toast('请输入角色名和权限名', 'bg-orange-500');
+            const res = await fetch('/api/user/role-permission?roleName=' + rname + '&permissionName=' + pname, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+            res.ok ? toast('绑定成功') : toast('绑定失败：' + res.status, 'bg-red-500');
+        });
+        async function changeRole(uid) {
+            const newRole = prompt('请输入新角色名');
+            if (!newRole) return;
+            try { await $api('/api/user/user-role?userId=' + uid + '&roleName=' + newRole, { method: 'PUT' }); toast('更换成功'); loadUserRoles(); } catch (e) { toast('更换失败：' + e.message); }
+        }
+        async function delRole(id) {
+            if (!confirm('确定删除该角色？')) return;
+            try { await $api('/api/user/role?roleName=' + id, { method: 'DELETE' }); toast('删除成功'); loadUserRoles(); } catch (e) { toast('删除失败：' + e.message); }
+        }
+        async function delPerm(name) {
+            if (!confirm('确定删除该权限？')) return;
+            try { await $api('/api/user/permission?permissionName=' + name, { method: 'DELETE' }); toast('删除成功'); loadUserRoles(); } catch (e) { toast('删除失败：' + e.message); }
+        }
+
+        /* --------------  接收父页面登录态 & 首次加载数据  -------------- */
+        window.addEventListener('message', e => {
+            if (e.data?.action === 'setLogin' && e.data.uid) {
+                localStorage.setItem('uid', e.data.uid);
+                localStorage.setItem('uname', e.data.uname);
+                loadUserRoles();   // 自动拉数据
+                const un = document.getElementById('top-username');
+                if (un) un.textContent = e.data.uname;
+            }
+        });
+
+        /* --------------  默认高亮并进入角色权限页  -------------- */
+        location.hash = 'role';
+        navs[1]?.classList.add('nav-active');   // 高亮第二项（角色权限）
+    </script>
+</body>
+
+</html>

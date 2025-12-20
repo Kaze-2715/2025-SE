@@ -237,6 +237,12 @@ public interface UserMapper {
     @Select("SELECT COUNT(*) FROM t_role_permission WHERE role_id = #{roleId} AND permission_id = #{permId}")
     int countRolePermission(@Param("roleId") String roleId, @Param("permId") String permId);
 
+    @Select("SELECT r.role_name " +
+                    "FROM t_user_role ur " +
+                    "JOIN t_role r ON ur.role_id = r.role_id " +
+                    "WHERE ur.user_id = #{userId}")
+    List<String> getRoleByUserId(@Param("userId") String userId);
+
     class UserSqlProvider {
         public String updateByIdSelective(UserUpdateDTO u) {
             return new SQL() {

@@ -66,7 +66,7 @@ public class UserLoginService {
         user.setLastLoginIP(dto.ip());
         userMapper.updateLoginInfo(user);
 
-        List<String> perms = userMapper.listPermCodeByUserId(user.getUserId());
+        List<String> perms = getPermissionsOfUser(user.getUserId());
         HttpSession session = request.getSession(true);
         session.setAttribute("userId", user.getUserId());
         session.setAttribute("perms", perms);
@@ -82,5 +82,13 @@ public class UserLoginService {
             user.setLoginLockedUntil(LocalDateTime.now().plusMinutes(5));
         }
         userMapper.updateLoginInfo(user);
+    }
+
+    public List<String> getPermissionsOfUser(String userId) {
+        return userMapper.listPermCodeByUserId(userId);
+    }
+
+    public List<String> getRoleOfUser(String userId) {
+        return userMapper.getRoleByUserId(userId);
     }
 }

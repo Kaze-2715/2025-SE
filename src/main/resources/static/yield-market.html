@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智慧农业 - 产量预测与市场分析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#22c55e',
+                        secondary: '#f97316',
+                        danger: '#ef4444',
+                        dark: '#1f2937',
+                        light: '#f3f4f6'
+                    },
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+
+    <!-- 关键：被 iframe 嵌套时清零 -->
+    <style type="text/tailwindcss">
+        /* ① 独立页面时填满视口 */
+    html,body{height:100%}
+    body{
+      display:flex;
+      flex-direction:column;
+      min-height:100vh;
+      margin:0;
+    }
+    /* ② 内容容器吃掉剩余高度 */
+    main.flex-1{flex:1;display:flex;flex-direction:column}
+    #content-wrapper{flex:1;width:100%}
+    /* ③ 仅当前板块显示，其余隐藏 */
+    #content-wrapper>section.section-hidden{display:none!important}
+    #content-wrapper>section:not(.section-hidden){display:block!important}
+    /* ④ 页脚贴底 + 去掉上下留白 */
+    footer{flex-shrink:0}
+    body>footer.py-4{padding-top:0!important;padding-bottom:0!important;border-top:none!important}
+    /* ⑤ 被 iframe 时照样清零 */
+    body.iframe-embedded header{display:none!important}
+    body.iframe-embedded{padding-top:0!important;margin-top:0!important;padding-bottom:0!important;margin-bottom:0!important}
+    body.iframe-embedded footer{display:none!important}
+    /* ⑥ 原有组件样式保留 */
+    .content-auto{content-visibility:auto}
+    .card-shadow{box-shadow:0 4px 20px rgba(0,0,0,.08)}
+    .nav-active{@apply bg-primary/10 text-primary border-l-4 border-primary}
+    .section-hidden{display:none!important}
+    .btn-primary{@apply bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-lg transition-all duration-300}
+    .btn-warning{@apply bg-secondary hover:bg-secondary/90 text-white font-medium py-2 px-4 rounded-lg transition-all duration-300}
+    .btn-danger{@apply bg-danger hover:bg-danger/90 text-white font-medium py-2 px-4 rounded-lg transition-all duration-300}
+    .btn-outline{@apply border border-gray-300 hover:border-primary hover:text-primary font-medium py-2 px-4 rounded-lg transition-all duration-300}
+    </style>
+</head>
+
+<body class="bg-gray-50 font-sans text-dark">
+    <!-- 顶部导航 -->
+    <header class="bg-white shadow-sm fixed top-0 left-0 right-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-leaf text-primary text-2xl"></i>
+                <h1 class="text-xl font-bold">智慧农业种植监控系统</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <span class="hidden md:inline-block text-sm text-gray-600" id="current-time"></span>
+                <!-- 价格波动报警铃铛 -->
+                <div class="relative">
+                    <i id="alert-bell" class="fa fa-bell text-gray-600 cursor-pointer"></i>
+                    <span id="alert-dot"
+                        class="absolute -top-1 -right-1 w-2 h-2 bg-orange-500 rounded-full hidden"></span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <img src="https://picsum.photos/id/1005/40/40" alt="用户头像" class="w-8 h-8 rounded-full object-cover">
+                    <span class="text-sm font-medium" id="top-username">游客</span>
+                </div>
+                <button id="logout-btn" class="btn-outline text-sm">退出</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <div class="flex-1 flex pt-24 pb-0">
+        <!-- 左侧导航 -->
+        <aside class="md:w-64 bg-white rounded-xl card-shadow p-4 flex-shrink-0">
+            <nav class="space-y-1">
+                <a href="#yield" class="nav-active flex items-center space-x-3 px-4 py-3 rounded-lg"><i
+                        class="fa fa-line-chart"></i><span>产量预测</span></a>
+                <a href="#market" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-50"><i
+                        class="fa fa-shopping-cart"></i><span>市场趋势</span></a>
+                <a href="#suggest" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-50"><i
+                        class="fa fa-bullhorn"></i><span>销售建议</span></a>
+                <a href="#report" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-50"><i
+                        class="fa fa-file-text"></i><span>分析报告</span></a>
+                <a href="#alert" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-50"><i
+                        class="fa fa-exclamation-triangle"></i><span>价格波动报警</span></a>
+            </nav>
+        </aside>
+
+        <!-- 右侧内容区 -->
+        <main class="flex-1 flex flex-col">
+            <div id="content-wrapper" class="flex-1 w-full space-y-8">
+                <!-- 产量预测 -->
+                <section id="yield" class="bg-white rounded-xl card-shadow p-6 section-hidden">
+                    <h2 class="text-xl font-bold mb-4">产量预测</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">种植计划</label>
+                            <select id="yield-plan"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50">
+                                <option value="">请选择种植计划</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">预测模型</label>
+                            <select id="yield-model"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50">
+                                <option value="">请选择模型</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="yield-predict-btn" class="btn-primary mt-4">生成预测</button>
+                    <div id="yield-result" class="mt-6 hidden">
+                        <h3 class="font-medium mb-2">预测结果</h3>
+                        <div class="bg-gray-50 p-4 rounded-lg text-sm space-y-1" id="yield-detail"></div>
+                    </div>
+                </section>
+
+                <!-- 市场趋势 -->
+                <section id="market" class="bg-white rounded-xl card-shadow p-6 section-hidden">
+                    <h2 class="text-xl font-bold mb-4">市场趋势</h2>
+                    <div class="flex flex-wrap gap-4 mb-4">
+                        <select id="market-crop"
+                            class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50">
+                            <option value="">选择作物</option>
+                            <option value="小麦">小麦</option>
+                            <option value="水稻">水稻</option>
+                            <option value="玉米">玉米</option>
+                        </select>
+                        <select id="market-range"
+                            class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50">
+                            <option value="30">近30天</option>
+                            <option value="90">近90天</option>
+                        </select>
+                        <button id="market-query" class="btn-outline">查询</button>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="font-medium mb-2">价格走势</h3>
+                            <canvas id="market-chart" height="150"></canvas>
+                        </div>
+                        <div>
+                            <h3 class="font-medium mb-2">电商对比</h3>
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">平台</th>
+                                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">价格（元/斤）</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ecommerce-tbody" class="bg-white divide-y divide-gray-200"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 销售建议 -->
+                <section id="suggest" class="bg-white rounded-xl card-shadow p-6 section-hidden">
+                    <h2 class="text-xl font-bold mb-4">销售建议</h2>
+                    <div class="flex flex-wrap gap-4 mb-4">
+                        <select id="suggest-crop"
+                            class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50">
+                            <option value="">选择作物</option>
+                            <option value="小麦">小麦</option>
+                            <option value="水稻">水稻</option>
+                            <option value="玉米">玉米</option>
+                        </select>
+                        <select id="suggest-channel"
+                            class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50">
+                            <option value="">销售渠道</option>
+                            <option value="批发">批发</option>
+                            <option value="零售">零售</option>
+                            <option value="电商">电商</option>
+                        </select>
+                        <button id="suggest-query" class="btn-outline">获取建议</button>
+                    </div>
+                    <div id="suggest-result" class="hidden">
+                        <h3 class="font-medium mb-2">建议结果</h3>
+                        <div class="bg-gray-50 p-4 rounded-lg text-sm space-y-1" id="suggest-detail"></div>
+                    </div>
+                </section>
+
+                <!-- 分析报告 -->
+                <section id="report" class="bg-white rounded-xl card-shadow p-6 section-hidden">
+                    <h2 class="text-xl font-bold mb-4">分析报告</h2>
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="flex gap-2">
+                            <button id="report-create" class="btn-primary text-sm">新建报告</button>
+                            <button id="report-share" class="btn-outline text-sm">分享</button>
+                        </div>
+                        <input type="text" id="report-search" placeholder="搜索报告标题"
+                            class="px-3 py-2 border border-gray-300 rounded-lg text-sm w-64">
+                    </div>
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">标题</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">生成时间</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">生成人</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="report-tbody" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                    <!-- 富文本编辑器弹窗 -->
+                    <div id="report-modal"
+                        class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+                        <div class="bg-white rounded-xl p-6 w-3/4 max-w-3xl max-h-[90vh] overflow-auto">
+                            <h3 class="text-lg font-bold mb-4">编辑报告</h3>
+                            <input id="report-title" type="text" placeholder="报告标题"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg mb-4">
+                            <div id="report-editor" class="border border-gray-300 rounded-lg p-3 min-h-[200px] mb-4"
+                                contenteditable="true"></div>
+                            <div class="flex justify-end gap-2">
+                                <button id="report-save" class="btn-primary">保存</button>
+                                <button id="report-cancel" class="btn-outline">取消</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 价格波动报警 -->
+                <section id="alert" class="bg-white rounded-xl card-shadow p-6 section-hidden">
+                    <h2 class="text-xl font-bold mb-4">价格波动报警</h2>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">阈值设置（±%）</label>
+                        <input id="alert-threshold" type="number" value="20"
+                            class="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50">
+                        <button id="alert-set" class="btn-outline ml-2">设置</button>
+                    </div>
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">作物</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">当前价格</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">历史均价</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">波动幅度</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">时间</th>
+                            </tr>
+                        </thead>
+                        <tbody id="alert-tbody" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="bg-white border-t border-gray-200 py-4 w-full">
+        <div class="container mx-auto px-4 text-center text-sm text-gray-500">
+            <p>© 2025 智慧农业种植监控系统 - 版权所有</p>
+        </div>
+    </footer>
+
+    <script>
+        /* ---------- 通用工具 ---------- */
+            const $api = async (url, opts = {}) => {
+                const res = await fetch(url, { ...opts, headers: { 'Content-Type': 'application/json', ...opts.headers } });
+                if (!res.ok) throw new Error(await res.text());
+                return res.json();
+            };
+            function toast(msg, bg = 'bg-green-500') {
+                const box = document.createElement('div');
+                box.className = `fixed top-5 right-5 text-white px-4 py-2 rounded shadow-lg ${bg} z-50`;
+                box.textContent = msg;
+                document.body.appendChild(box);
+                setTimeout(() => box.remove(), 2500);
+            }
+
+            /* ---------- 顶部时间 ---------- */
+            const tick = () => {
+                const el = document.getElementById('current-time');
+                if (el) el.textContent = new Date().toLocaleString('zh-CN');
+            };
+            tick(); setInterval(tick, 1000);
+
+            /* ---------- 被嵌套时隐藏 header（保留 DOM，避免空对象） ---------- */
+            if (window.self !== window.top) {
+                const header = document.querySelector('header');
+                if (header) {
+                    header.style.position = 'absolute';
+                    header.style.visibility = 'hidden';
+                    header.style.height = '0';
+                    header.style.overflow = 'hidden';
+                }
+                document.body.classList.add('pt-0');
+            }
+
+            /* ---------- 按钮事件「可空绑定」 ---------- */
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => {
+                    localStorage.removeItem('uid');
+                    localStorage.removeItem('uname');
+                    toast('已退出');
+                    location.reload();
+                });
+            }
+
+            /* ---------- 接收父页面登录态 ---------- */
+            window.addEventListener('message', e => {
+                if (e.data?.action === 'setLogin' && e.data.uid) {
+                    localStorage.setItem('uid', e.data.uid);
+                    localStorage.setItem('uname', e.data.uname);
+                }
+            });
+
+            /* ---------- 路由切换 ---------- */
+            const navs = document.querySelectorAll('aside nav a');
+            const sections = document.querySelectorAll('main section');
+            navs.forEach(n => n.addEventListener('click', e => {
+                e.preventDefault();
+                const id = n.getAttribute('href').slice(1);
+                navs.forEach(x => x.classList.remove('nav-active'));
+                n.classList.add('nav-active');
+                sections.forEach(s => s.classList.add('section-hidden'));
+                document.getElementById(id)?.classList.remove('section-hidden');
+            }));
+
+            /* ---------- 默认高亮并进入产量预测页 ---------- */
+            location.hash = 'yield';
+            navs[0]?.classList.add('nav-active');
+
+            /* ---------- 产量预测 ---------- */
+            async function loadPlansAndModels() {
+                try {
+                    const plans = await $api('/api/plan/my');
+                    const planSel = document.getElementById('yield-plan');
+                    planSel.innerHTML = '<option value="">请选择种植计划</option>';
+                    plans.forEach(p => planSel.innerHTML += `<option value="${p.id}">${p.cropType} - ${p.fieldName}</option>`);
+                    const models = await $api('/analysis/yield/models/wheat');
+                    const modelSel = document.getElementById('yield-model');
+                    modelSel.innerHTML = '<option value="">请选择模型</option>';
+                    models.forEach(m => modelSel.innerHTML += `<option value="${m.id}">${m.name}</option>`);
+                } catch (e) { toast('加载计划/模型失败：' + e.message, 'bg-red-500'); }
+            }
+
+            const yieldBtn = document.getElementById('yield-predict-btn');
+            if (yieldBtn) {
+                yieldBtn.addEventListener('click', async () => {
+                    const planId = document.getElementById('yield-plan')?.value;
+                    const modelId = document.getElementById('yield-model')?.value;
+                    if (!planId || !modelId) return toast('请选择计划和模型', 'bg-orange-500');
+                    try {
+                        const res = await $api('/analysis/yield/predict?planId=' + planId + '&modelId=' + modelId, { method: 'POST' });
+                        const box = document.getElementById('yield-result');
+                        if (box) box.classList.remove('hidden');
+                        const detail = document.getElementById('yield-detail');
+                        if (detail) detail.innerHTML = `
+                <div>预估产量：<span class="font-bold">${res.estimatedYield} 吨</span></div>
+                <div>误差范围：±${res.errorRange}%</div>
+                <div>影响因素：${res.factor || '光照充足，预估提升 5%'}</div>`;
+                    } catch (e) { toast('预测失败：' + e.message, 'bg-red-500'); }
+                });
+            }
+
+            /* ---------- 市场趋势 ---------- */
+            let marketChart;
+            const marketBtn = document.getElementById('market-query');
+            if (marketBtn) {
+                marketBtn.addEventListener('click', async () => {
+                    const crop = document.getElementById('market-crop')?.value;
+                    const range = document.getElementById('market-range')?.value;
+                    if (!crop) return toast('请选择作物', 'bg-orange-500');
+                    try {
+                        const history = await $api(`/analysis/market/history/${crop}`);
+                        const labels = history.map(h => h.date);
+                        const prices = history.map(h => h.avgPrice);
+                        const ctx = document.getElementById('market-chart')?.getContext('2d');
+                        if (ctx) {
+                            if (marketChart) marketChart.destroy();
+                            marketChart = new Chart(ctx, {
+                                type: 'line',
+                                data: {
+                                    labels,
+                                    datasets: [{ label: '均价（元/斤）', data: prices, borderColor: '#22c55e', tension: 0.3 }]
+                                },
+                                options: { responsive: true, plugins: { legend: { display: false } } }
+                            });
+                        }
+                        const ecommerce = await $api(`/analysis/ecommerce/compare/${crop}`);
+                        const etbody = document.getElementById('ecommerce-tbody');
+                        if (etbody) etbody.innerHTML = ecommerce.map(e => `
+                <tr><td class="px-3 py-2 text-sm">${e.platform}</td><td class="px-3 py-2 text-sm">${e.price}</td></tr>`).join('');
+                    } catch (e) { toast('市场数据加载失败：' + e.message, 'bg-red-500'); }
+                });
+            }
+
+            /* ---------- 销售建议 ---------- */
+            const suggestBtn = document.getElementById('suggest-query');
+            if (suggestBtn) {
+                suggestBtn.addEventListener('click', async () => {
+                    const crop = document.getElementById('suggest-crop')?.value;
+                    const channel = document.getElementById('suggest-channel')?.value;
+                    if (!crop) return toast('请选择作物', 'bg-orange-500');
+                    try {
+                        const res = await $api(`/analysis/suggestion?crop=${crop}&channel=${channel || ''}`);
+                        const box = document.getElementById('suggest-result');
+                        if (box) box.classList.remove('hidden');
+                        const detail = document.getElementById('suggest-detail');
+                        if (detail) detail.innerHTML = `
+                <div>最佳销售时间：<span class="font-bold">${res.bestTime}</span></div>
+                <div>建议价格区间：${res.priceRange} 元/斤</div>
+                <div>渠道建议：${channel || '通用'}</div>
+                <div>依据：${res.reason}</div>`;
+                    } catch (e) { toast('建议加载失败：' + e.message, 'bg-red-500'); }
+                });
+            }
+
+            /* ---------- 分析报告 ---------- */
+            function loadReports() {
+                // 待对接：/analysis/report/list
+                const mock = [{ id: 1, title: '2025 小麦市场分析报告', createTime: '2025-12-20 10:00', creator: '分析师A' }];
+                const tbody = document.getElementById('report-tbody');
+                if (tbody) tbody.innerHTML = mock.map(r => `
+        <tr>
+            <td class="px-3 py-2 text-sm">${r.title}</td>
+            <td class="px-3 py-2 text-sm">${r.createTime}</td>
+            <td class="px-3 py-2 text-sm">${r.creator}</td>
+            <td class="px-3 py-2 text-sm space-x-1">
+                <button class="text-primary hover:underline text-xs" onclick="viewReport(${r.id})">查看</button>
+                <button class="text-primary hover:underline text-xs" onclick="exportReport(${r.id})">导出</button>
+            </td>
+        </tr>`).join('');
+            }
+            const reportCreate = document.getElementById('report-create');
+            const reportSave = document.getElementById('report-save');
+            const reportCancel = document.getElementById('report-cancel');
+            if (reportCreate) reportCreate.addEventListener('click', () => document.getElementById('report-modal')?.classList.remove('hidden'));
+            if (reportCancel) reportCancel.addEventListener('click', () => document.getElementById('report-modal')?.classList.add('hidden'));
+            if (reportSave) reportSave.addEventListener('click', async () => {
+                const title = document.getElementById('report-title')?.value;
+                const content = document.getElementById('report-editor')?.innerText;
+                if (!title || !content) return toast('请填写标题和内容', 'bg-orange-500');
+                try {
+                    await $api('/analysis/market/generate?cropType=' + title, { method: 'POST', body: JSON.stringify({ title, content }) });
+                    toast('保存成功');
+                    loadReports();
+                    document.getElementById('report-modal')?.classList.add('hidden');
+                } catch (e) { toast('保存失败：' + e.message, 'bg-red-500'); }
+            });
+            function viewReport(id) { toast('查看功能待实现', 'bg-blue-500'); }
+            function exportReport(id) { toast('导出功能待实现', 'bg-blue-500'); }
+
+            /* ---------- 价格波动报警 ---------- */
+            let alertThreshold = 20;
+            async function loadAlerts() {
+                try {
+                    const alerts = await $api(`/analysis/alert?threshold=${alertThreshold}`);
+                    const tbody = document.getElementById('alert-tbody');
+                    if (tbody) tbody.innerHTML = alerts.map(a => `
+            <tr>
+                <td class="px-3 py-2 text-sm">${a.crop}</td>
+                <td class="px-3 py-2 text-sm">${a.currentPrice}</td>
+                <td class="px-3 py-2 text-sm">${a.avgPrice}</td>
+                <td class="px-3 py-2 text-sm ${a.ratio > 0 ? 'text-red-600' : 'text-green-600'}">${a.ratio > 0 ? '+' : ''}${a.ratio}%</td>
+                <td class="px-3 py-2 text-sm">${a.time}</td>
+            </tr>`).join('');
+                    const dot = document.getElementById('alert-dot');
+                    if (dot) dot.classList.toggle('hidden', alerts.length === 0);
+                } catch (e) { toast('报警数据加载失败：' + e.message, 'bg-red-500'); }
+            }
+            const alertSet = document.getElementById('alert-set');
+            if (alertSet) alertSet.addEventListener('click', () => {
+                alertThreshold = document.getElementById('alert-threshold')?.value || 20;
+                toast('阈值已更新');
+                loadAlerts();
+            });
+
+            /* ---------- 初始化 ---------- */
+            loadPlansAndModels();
+            loadReports();
+            loadAlerts();
+    </script>
+</body>
+
+</html>

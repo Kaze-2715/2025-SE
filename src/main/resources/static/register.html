@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智慧农业 - 注册</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: #f3f4f6;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+    <div class="w-full max-w-md">
+        <section class="bg-white rounded-xl shadow-lg p-6">
+            <div class="text-center mb-4">
+                <i class="fa fa-leaf text-green-500 text-3xl"></i>
+                <h1 class="text-xl font-bold mt-2">智慧农业种植监控系统</h1>
+                <p class="text-gray-500 text-sm">用户注册</p>
+            </div>
+
+            <form id="reg-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">注册方式</label>
+                    <select id="reg-type"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <option value="USERNAME">用户名</option>
+                        <option value="EMAIL">邮箱</option>
+                        <option value="PHONE">手机号</option>
+                    </select>
+                </div>
+
+                <div id="reg-account-group">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">账号</label>
+                    <input type="text" id="reg-account" required placeholder="请输入账号"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+
+                <div id="reg-code-group" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">验证码</label>
+                    <div class="flex space-x-2">
+                        <input type="text" id="reg-code" placeholder="请输入验证码"
+                            class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <button type="button" id="send-code"
+                            class="px-3 py-2 border border-gray-300 rounded-lg hover:border-green-500 hover:text-green-500 text-sm">发送验证码</button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">密码</label>
+                    <input type="password" id="reg-pwd" required placeholder="请输入密码"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">确认密码</label>
+                    <input type="password" id="reg-pwd2" required placeholder="请再次输入密码"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+
+                <button type="submit"
+                    class="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition">
+                    注册
+                </button>
+            </form>
+
+            <div class="text-center mt-4 text-sm">
+                已有账号？
+                <a href="login.html" class="text-green-600 hover:underline">立即登录</a>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        /* 通用提示 */
+        function toast(msg, bg = 'bg-green-500') {
+            const box = document.createElement('div');
+            box.className = `fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white px-6 py-3 rounded-lg shadow-xl ${bg} z-50`;
+            box.textContent = msg;
+            document.body.appendChild(box);
+            setTimeout(() => (box.style.opacity = '0'), 2500);
+            setTimeout(() => box.remove(), 2800);
+        }
+
+        /* 发送验证码 */
+        document.getElementById('send-code').addEventListener('click', async () => {
+            const email = document.getElementById('reg-account').value;
+            if (!email) return toast('请先输入邮箱', 'bg-orange-500');
+            try {
+                await fetch('/api/verify-code/send?target=' + email + '&type=EMAIL', { method: 'POST' });
+                toast('验证码已发送');
+            } catch (e) {
+                toast('发送失败：' + e.message, 'bg-red-500');
+            }
+        });
+
+        /* 注册请求 */
+        document.getElementById('reg-form').addEventListener('submit', async e => {
+            e.preventDefault();
+            const type = document.getElementById('reg-type').value;
+            const login = document.getElementById('reg-account').value;
+            const pwd = document.getElementById('reg-pwd').value;
+            const pwd2 = document.getElementById('reg-pwd2').value;
+            if (pwd !== pwd2) return toast('两次密码不一致', 'bg-red-500');
+
+            const code = type === 'EMAIL' ? document.getElementById('reg-code').value : '';
+
+            try {
+                const res = await fetch('/api/user/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type, login, password: pwd, verifyCode: code })
+                });
+                if (!res.ok) throw new Error(await res.text());
+
+                toast('注册成功！即将跳转登录页');
+                setTimeout(() => location.href = 'login.html', 1200);
+            } catch (err) {
+                toast('注册失败：' + err.message, 'bg-red-500');
+            }
+        });
+    </script>
+</body>
+
+</html>
