@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/assets/img/nputxt.ico" type="image/x-icon">
     <title>智慧农业 - 登录</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -94,7 +95,7 @@
                 localStorage.setItem('uid', data.userId);
                 localStorage.setItem('uname', data.username);
                 localStorage.setItem('perms', JSON.stringify(data.permissions));
-                localStorage.setItem('roles', JSON.stringify(data.roles));
+                localStorage.setItem('roles', JSON.stringify(data.role));
 
                 toast('登录成功');
                 // 跳回主控制台

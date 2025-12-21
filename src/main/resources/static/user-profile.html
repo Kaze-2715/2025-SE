@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智慧农业 - 完善信息</title>
+    <link rel="icon" href="/assets/img/nputxt.ico" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style type="text/tailwindcss">
+        .card-shadow { box-shadow: 0 4px 20px rgba(0,0,0,.08); }
+        .btn-primary { @apply bg-green-500 text-white font-medium py-2 px-4 rounded hover:bg-green-600 transition; }
+    </style>
+</head>
+
+<body class="bg-gray-50 font-sans text-dark">
+    <!-- 顶部导航（被 iframe 嵌套时会被隐藏） -->
+    <header class="bg-white shadow-sm fixed top-0 left-0 right-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-leaf text-green-500 text-2xl"></i>
+                <h1 class="text-xl font-bold">智慧农业种植监控系统</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="relative flex items-center space-x-2 group">
+                    <img src="https://picsum.photos/id/1005/40/40" alt="用户头像" class="w-8 h-8 rounded-full object-cover">
+                    <span class="text-sm font-medium" id="top-username">游客</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容 -->
+    <div class="container mx-auto px-4 pt-24 pb-16">
+        <section class="bg-white rounded-xl card-shadow p-6 max-w-xl mx-auto">
+            <h2 class="text-xl font-bold mb-4">完善用户信息</h2>
+            <form id="profile-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">用户名</label>
+                    <input type="text" id="prof-username" placeholder="选填"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">邮箱</label>
+                    <input type="email" id="prof-email" placeholder="选填"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">手机号</label>
+                    <input type="tel" id="prof-phone" placeholder="选填"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+                <button type="submit" class="btn-primary">保存</button>
+            </form>
+        </section>
+    </div>
+
+    <footer class="bg-white border-t border-gray-200 py-4">
+        <div class="container mx-auto px-4 text-center text-sm text-gray-500">
+            <p>© 2025 智慧农业种植监控系统 - 版权所有</p>
+        </div>
+    </footer>
+
+    <script>
+        const toast = (msg, bg = 'bg-green-500') => {
+            const box = document.createElement('div');
+            box.className = `fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white px-6 py-3 rounded-lg shadow-xl ${bg} z-50`;
+            box.textContent = msg;
+            document.body.appendChild(box);
+            setTimeout(() => box.remove(), 2500);
+        };
+
+        if (window.self !== window.top) {
+            const header = document.querySelector('header');
+            header.style.position = 'absolute';
+            header.style.visibility = 'hidden';
+            header.style.height = '0';
+            header.style.overflow = 'hidden';
+            document.body.classList.add('pt-0');
+        }
+
+        const uname = localStorage.getItem('uname');
+        if (uname) document.getElementById('top-username').textContent = uname;
+
+        document.getElementById('profile-form').addEventListener('submit', async e => {
+            e.preventDefault();
+            const uid = localStorage.getItem('uid');
+            if (!uid) return toast('请先登录', 'bg-orange-500');
+            const dto = {
+                userId: uid,
+                username: document.getElementById('prof-username').value,
+                email: document.getElementById('prof-email').value,
+                phoneNumber: document.getElementById('prof-phone').value
+            };
+            try {
+                const res = await fetch('/api/user/update', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dto) });
+                if (!res.ok) throw new Error(await res.text());
+                toast('保存成功');
+            } catch (err) {
+                toast('保存失败：' + err.message, 'bg-red-500');
+            }
+        });
+    </script>
+</body>
+
+</html>
