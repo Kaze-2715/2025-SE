@@ -270,165 +270,187 @@
 
     <script>
         /* ---------- 通用工具 ---------- */
-            const $api = async (url, opts = {}) => {
-                const res = await fetch(url, { ...opts, headers: { 'Content-Type': 'application/json', ...opts.headers } });
-                if (!res.ok) throw new Error(await res.text());
-                return res.json();
-            };
-            function toast(msg, bg = 'bg-green-500') {
-                const box = document.createElement('div');
-                box.className = `fixed top-5 right-5 text-white px-4 py-2 rounded shadow-lg ${bg} z-50`;
-                box.textContent = msg;
-                document.body.appendChild(box);
-                setTimeout(() => box.remove(), 2500);
+        const $api = async (url, opts = {}) => {
+            const res = await fetch(url, { ...opts, headers: { 'Content-Type': 'application/json', ...opts.headers } });
+            if (!res.ok) throw new Error(await res.text());
+            return res.json();
+        };
+        function toast(msg, bg = 'bg-green-500') {
+            const box = document.createElement('div');
+            box.className = `fixed top-5 right-5 text-white px-4 py-2 rounded shadow-lg ${bg} z-50`;
+            box.textContent = msg;
+            document.body.appendChild(box);
+            setTimeout(() => box.remove(), 2500);
+        }
+
+        /* ---------- 顶部时间 ---------- */
+        const tick = () => {
+            const el = document.getElementById('current-time');
+            if (el) el.textContent = new Date().toLocaleString('zh-CN');
+        };
+        tick(); setInterval(tick, 1000);
+
+        /* ---------- 被嵌套时隐藏 header（保留 DOM，避免空对象） ---------- */
+        if (window.self !== window.top) {
+            const header = document.querySelector('header');
+            if (header) {
+                header.style.position = 'absolute';
+                header.style.visibility = 'hidden';
+                header.style.height = '0';
+                header.style.overflow = 'hidden';
             }
+            document.body.classList.add('pt-0');
+        }
 
-            /* ---------- 顶部时间 ---------- */
-            const tick = () => {
-                const el = document.getElementById('current-time');
-                if (el) el.textContent = new Date().toLocaleString('zh-CN');
-            };
-            tick(); setInterval(tick, 1000);
-
-            /* ---------- 被嵌套时隐藏 header（保留 DOM，避免空对象） ---------- */
-            if (window.self !== window.top) {
-                const header = document.querySelector('header');
-                if (header) {
-                    header.style.position = 'absolute';
-                    header.style.visibility = 'hidden';
-                    header.style.height = '0';
-                    header.style.overflow = 'hidden';
-                }
-                document.body.classList.add('pt-0');
-            }
-
-            /* ---------- 按钮事件「可空绑定」 ---------- */
-            const logoutBtn = document.getElementById('logout-btn');
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', () => {
-                    localStorage.removeItem('uid');
-                    localStorage.removeItem('uname');
-                    toast('已退出');
-                    location.reload();
-                });
-            }
-
-            /* ---------- 接收父页面登录态 ---------- */
-            window.addEventListener('message', e => {
-                if (e.data?.action === 'setLogin' && e.data.uid) {
-                    localStorage.setItem('uid', e.data.uid);
-                    localStorage.setItem('uname', e.data.uname);
-                }
+        /* ---------- 按钮事件「可空绑定」 ---------- */
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                localStorage.removeItem('uid');
+                localStorage.removeItem('uname');
+                toast('已退出');
+                location.reload();
             });
+        }
 
-            /* ---------- 路由切换 ---------- */
-            const navs = document.querySelectorAll('aside nav a');
-            const sections = document.querySelectorAll('main section');
-            navs.forEach(n => n.addEventListener('click', e => {
-                e.preventDefault();
-                const id = n.getAttribute('href').slice(1);
-                navs.forEach(x => x.classList.remove('nav-active'));
-                n.classList.add('nav-active');
-                sections.forEach(s => s.classList.add('section-hidden'));
-                document.getElementById(id)?.classList.remove('section-hidden');
-            }));
+        /* ---------- 接收父页面登录态 ---------- */
+        window.addEventListener('message', e => {
+            if (e.data?.action === 'setLogin' && e.data.uid) {
+                localStorage.setItem('uid', e.data.uid);
+                localStorage.setItem('uname', e.data.uname);
+            }
+        });
 
-            /* ---------- 默认高亮并进入产量预测页 ---------- */
-            location.hash = 'yield';
-            navs[0]?.classList.add('nav-active');
+        /* ---------- 路由切换 ---------- */
+        const navs = document.querySelectorAll('aside nav a');
+        const sections = document.querySelectorAll('main section');
+        navs.forEach(n => n.addEventListener('click', e => {
+            e.preventDefault();
+            const id = n.getAttribute('href').slice(1);
+            navs.forEach(x => x.classList.remove('nav-active'));
+            n.classList.add('nav-active');
+            sections.forEach(s => s.classList.add('section-hidden'));
+            document.getElementById(id)?.classList.remove('section-hidden');
+        }));
 
-            /* ---------- 产量预测 ---------- */
-            async function loadPlansAndModels() {
-                try {
-                    const plans = await $api('/api/plan/my');
-                    const planSel = document.getElementById('yield-plan');
-                    planSel.innerHTML = '<option value="">请选择种植计划</option>';
-                    plans.forEach(p => planSel.innerHTML += `<option value="${p.id}">${p.cropType} - ${p.fieldName}</option>`);
-                    const models = await $api('/analysis/yield/models/wheat');
+        /* ---------- 默认高亮并进入产量预测页 ---------- */
+        location.hash = 'yield';
+        navs[0]?.classList.add('nav-active');
+
+        /* ---------- 产量预测 ---------- */
+        async function loadPlansAndModels() {
+            try {
+                const farmerId = localStorage.getItem('uid');
+                const plans = await $api(`/planting-plan/farmer/${farmerId}`);
+                const planSel = document.getElementById('yield-plan');
+                planSel.innerHTML = '<option value="">请选择种植计划</option>';
+                plans.forEach(p => {
+                    // 关键：加上 data-crop
+                    planSel.innerHTML +=
+                        `<option value="${p.planId}" data-crop="${p.cropType}">${p.cropType}</option>`;
+                });
+
+                planSel.addEventListener('change', async () => {
+                    const opt = planSel.options[planSel.selectedIndex];
+                    const crop = opt?.dataset.crop;
+                    if (!crop) return;          // 没选计划就忽略
                     const modelSel = document.getElementById('yield-model');
-                    modelSel.innerHTML = '<option value="">请选择模型</option>';
-                    models.forEach(m => modelSel.innerHTML += `<option value="${m.id}">${m.name}</option>`);
-                } catch (e) { toast('加载计划/模型失败：' + e.message, 'bg-red-500'); }
-            }
-
-            const yieldBtn = document.getElementById('yield-predict-btn');
-            if (yieldBtn) {
-                yieldBtn.addEventListener('click', async () => {
-                    const planId = document.getElementById('yield-plan')?.value;
-                    const modelId = document.getElementById('yield-model')?.value;
-                    if (!planId || !modelId) return toast('请选择计划和模型', 'bg-orange-500');
+                    modelSel.innerHTML = '<option value="">加载中…</option>';
                     try {
-                        const res = await $api('/analysis/yield/predict?planId=' + planId + '&modelId=' + modelId, { method: 'POST' });
-                        const box = document.getElementById('yield-result');
-                        if (box) box.classList.remove('hidden');
-                        const detail = document.getElementById('yield-detail');
-                        if (detail) detail.innerHTML = `
-                <div>预估产量：<span class="font-bold">${res.estimatedYield} 吨</span></div>
-                <div>误差范围：±${res.errorRange}%</div>
-                <div>影响因素：${res.factor || '光照充足，预估提升 5%'}</div>`;
-                    } catch (e) { toast('预测失败：' + e.message, 'bg-red-500'); }
+                        const models = await $api(`/analysis/yield/models/${crop}`);
+                        modelSel.innerHTML = '<option value="">请选择模型</option>';
+                        models.forEach(m =>
+                            modelSel.innerHTML += `<option value="${m.modelId}">${m.modelName}</option>`
+                        );
+                    } catch (e) {
+                        toast('模型加载失败：' + e.message, 'bg-red-500');
+                        modelSel.innerHTML = '<option value="">加载失败</option>';
+                    }
                 });
+            } catch (e) {
+                toast('加载计划/模型失败：' + e.message, 'bg-red-500');
             }
+        }
 
-            /* ---------- 市场趋势 ---------- */
-            let marketChart;
-            const marketBtn = document.getElementById('market-query');
-            if (marketBtn) {
-                marketBtn.addEventListener('click', async () => {
-                    const crop = document.getElementById('market-crop')?.value;
-                    const range = document.getElementById('market-range')?.value;
-                    if (!crop) return toast('请选择作物', 'bg-orange-500');
-                    try {
-                        const history = await $api(`/analysis/market/history/${crop}`);
-                        const labels = history.map(h => h.date);
-                        const prices = history.map(h => h.avgPrice);
-                        const ctx = document.getElementById('market-chart')?.getContext('2d');
-                        if (ctx) {
-                            if (marketChart) marketChart.destroy();
-                            marketChart = new Chart(ctx, {
-                                type: 'line',
-                                data: {
-                                    labels,
-                                    datasets: [{ label: '均价（元/斤）', data: prices, borderColor: '#22c55e', tension: 0.3 }]
-                                },
-                                options: { responsive: true, plugins: { legend: { display: false } } }
-                            });
-                        }
-                        const ecommerce = await $api(`/analysis/ecommerce/compare/${crop}`);
-                        const etbody = document.getElementById('ecommerce-tbody');
-                        if (etbody) etbody.innerHTML = ecommerce.map(e => `
-                <tr><td class="px-3 py-2 text-sm">${e.platform}</td><td class="px-3 py-2 text-sm">${e.price}</td></tr>`).join('');
-                    } catch (e) { toast('市场数据加载失败：' + e.message, 'bg-red-500'); }
-                });
-            }
+        const yieldBtn = document.getElementById('yield-predict-btn');
+        if (yieldBtn) {
+            yieldBtn.addEventListener('click', async () => {
+                const planId = document.getElementById('yield-plan')?.value;
+                const modelId = document.getElementById('yield-model')?.value;
+                if (!planId || !modelId) return toast('请选择计划和模型', 'bg-orange-500');
+                try {
+                    const res = await $api('/analysis/yield/predict?planId=' + planId + '&modelId=' + modelId, { method: 'POST' });
+                    const box = document.getElementById('yield-result');
+                    if (box) box.classList.remove('hidden');
+                    const kg = Math.round(res.predictedYield); // 四舍五入到整数
+                    const detail = document.getElementById('yield-detail');
+                    if (detail) detail.innerHTML = `
+  <div>预估产量：<span class="font-bold">${kg} 千克</span></div>
+  <div>置信区间：±${(res.confidence * 100).toFixed(1)}%</div>
+  <div>影响因素：${res.factors || '光照充足，预估提升 5%'}</div>`;
+                } catch (e) { toast('预测失败：' + e.message, 'bg-red-500'); }
+            });
+        }
 
-            /* ---------- 销售建议 ---------- */
-            const suggestBtn = document.getElementById('suggest-query');
-            if (suggestBtn) {
-                suggestBtn.addEventListener('click', async () => {
-                    const crop = document.getElementById('suggest-crop')?.value;
-                    const channel = document.getElementById('suggest-channel')?.value;
-                    if (!crop) return toast('请选择作物', 'bg-orange-500');
-                    try {
-                        const res = await $api(`/analysis/suggestion?crop=${crop}&channel=${channel || ''}`);
-                        const box = document.getElementById('suggest-result');
-                        if (box) box.classList.remove('hidden');
-                        const detail = document.getElementById('suggest-detail');
-                        if (detail) detail.innerHTML = `
+        /* ---------- 市场趋势 ---------- */
+        let marketChart;
+        const marketBtn = document.getElementById('market-query');
+        if (marketBtn) {
+            marketBtn.addEventListener('click', async () => {
+                const crop = document.getElementById('market-crop')?.value;
+                const range = document.getElementById('market-range')?.value;
+                if (!crop) return toast('请选择作物', 'bg-orange-500');
+                try {
+                    const history = await $api(`/analysis/market/history/${crop}`);
+                    const labels = history.map(h => h.analysisDate);
+                    const prices = history.map(h => h.currentPrice);
+                    const ctx = document.getElementById('market-chart')?.getContext('2d');
+                    if (ctx) {
+                        if (marketChart) marketChart.destroy();
+                        marketChart = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels,
+                                datasets: [{ label: '均价（元/斤）', data: prices, borderColor: '#22c55e', tension: 0.3 }]
+                            },
+                            options: { responsive: true, plugins: { legend: { display: false } } }
+                        });
+                    }
+                    const ecommerce = await $api(`/analysis/ecommerce/compare/${crop}`);
+                    const etbody = document.getElementById('ecommerce-tbody');
+                    if (etbody) etbody.innerHTML = ecommerce.map(e => `
+                <tr><td class="px-3 py-2 text-sm">${e.platformName}</td><td class="px-3 py-2 text-sm">${e.price}</td></tr>`).join('');
+                } catch (e) { toast('市场数据加载失败：' + e.message, 'bg-red-500'); }
+            });
+        }
+
+        /* ---------- 销售建议 ---------- */
+        const suggestBtn = document.getElementById('suggest-query');
+        if (suggestBtn) {
+            suggestBtn.addEventListener('click', async () => {
+                const crop = document.getElementById('suggest-crop')?.value;
+                const channel = document.getElementById('suggest-channel')?.value;
+                if (!crop) return toast('请选择作物', 'bg-orange-500');
+                try {
+                    const res = await $api(`/analysis/suggestion?crop=${crop}&channel=${channel || ''}`);
+                    const box = document.getElementById('suggest-result');
+                    if (box) box.classList.remove('hidden');
+                    const detail = document.getElementById('suggest-detail');
+                    if (detail) detail.innerHTML = `
                 <div>最佳销售时间：<span class="font-bold">${res.bestTime}</span></div>
                 <div>建议价格区间：${res.priceRange} 元/斤</div>
                 <div>渠道建议：${channel || '通用'}</div>
                 <div>依据：${res.reason}</div>`;
-                    } catch (e) { toast('建议加载失败：' + e.message, 'bg-red-500'); }
-                });
-            }
+                } catch (e) { toast('建议加载失败：' + e.message, 'bg-red-500'); }
+            });
+        }
 
-            /* ---------- 分析报告 ---------- */
-            function loadReports() {
-                // 待对接：/analysis/report/list
-                const mock = [{ id: 1, title: '2025 小麦市场分析报告', createTime: '2025-12-20 10:00', creator: '分析师A' }];
-                const tbody = document.getElementById('report-tbody');
-                if (tbody) tbody.innerHTML = mock.map(r => `
+        /* ---------- 分析报告 ---------- */
+        function loadReports() {
+            // 待对接：/analysis/report/list
+            const mock = [{ id: 1, title: '2025 小麦市场分析报告', createTime: '2025-12-20 10:00', creator: '分析师A' }];
+            const tbody = document.getElementById('report-tbody');
+            if (tbody) tbody.innerHTML = mock.map(r => `
         <tr>
             <td class="px-3 py-2 text-sm">${r.title}</td>
             <td class="px-3 py-2 text-sm">${r.createTime}</td>
@@ -438,33 +460,33 @@
                 <button class="text-primary hover:underline text-xs" onclick="exportReport(${r.id})">导出</button>
             </td>
         </tr>`).join('');
-            }
-            const reportCreate = document.getElementById('report-create');
-            const reportSave = document.getElementById('report-save');
-            const reportCancel = document.getElementById('report-cancel');
-            if (reportCreate) reportCreate.addEventListener('click', () => document.getElementById('report-modal')?.classList.remove('hidden'));
-            if (reportCancel) reportCancel.addEventListener('click', () => document.getElementById('report-modal')?.classList.add('hidden'));
-            if (reportSave) reportSave.addEventListener('click', async () => {
-                const title = document.getElementById('report-title')?.value;
-                const content = document.getElementById('report-editor')?.innerText;
-                if (!title || !content) return toast('请填写标题和内容', 'bg-orange-500');
-                try {
-                    await $api('/analysis/market/generate?cropType=' + title, { method: 'POST', body: JSON.stringify({ title, content }) });
-                    toast('保存成功');
-                    loadReports();
-                    document.getElementById('report-modal')?.classList.add('hidden');
-                } catch (e) { toast('保存失败：' + e.message, 'bg-red-500'); }
-            });
-            function viewReport(id) { toast('查看功能待实现', 'bg-blue-500'); }
-            function exportReport(id) { toast('导出功能待实现', 'bg-blue-500'); }
+        }
+        const reportCreate = document.getElementById('report-create');
+        const reportSave = document.getElementById('report-save');
+        const reportCancel = document.getElementById('report-cancel');
+        if (reportCreate) reportCreate.addEventListener('click', () => document.getElementById('report-modal')?.classList.remove('hidden'));
+        if (reportCancel) reportCancel.addEventListener('click', () => document.getElementById('report-modal')?.classList.add('hidden'));
+        if (reportSave) reportSave.addEventListener('click', async () => {
+            const title = document.getElementById('report-title')?.value;
+            const content = document.getElementById('report-editor')?.innerText;
+            if (!title || !content) return toast('请填写标题和内容', 'bg-orange-500');
+            try {
+                await $api('/analysis/market/generate?cropType=' + title, { method: 'POST', body: JSON.stringify({ title, content }) });
+                toast('保存成功');
+                loadReports();
+                document.getElementById('report-modal')?.classList.add('hidden');
+            } catch (e) { toast('保存失败：' + e.message, 'bg-red-500'); }
+        });
+        function viewReport(id) { toast('查看功能待实现', 'bg-blue-500'); }
+        function exportReport(id) { toast('导出功能待实现', 'bg-blue-500'); }
 
-            /* ---------- 价格波动报警 ---------- */
-            let alertThreshold = 20;
-            async function loadAlerts() {
-                try {
-                    const alerts = await $api(`/analysis/alert?threshold=${alertThreshold}`);
-                    const tbody = document.getElementById('alert-tbody');
-                    if (tbody) tbody.innerHTML = alerts.map(a => `
+        /* ---------- 价格波动报警 ---------- */
+        let alertThreshold = 20;
+        async function loadAlerts() {
+            try {
+                const alerts = await $api(`/analysis/alert?threshold=${alertThreshold}`);
+                const tbody = document.getElementById('alert-tbody');
+                if (tbody) tbody.innerHTML = alerts.map(a => `
             <tr>
                 <td class="px-3 py-2 text-sm">${a.crop}</td>
                 <td class="px-3 py-2 text-sm">${a.currentPrice}</td>
@@ -472,22 +494,300 @@
                 <td class="px-3 py-2 text-sm ${a.ratio > 0 ? 'text-red-600' : 'text-green-600'}">${a.ratio > 0 ? '+' : ''}${a.ratio}%</td>
                 <td class="px-3 py-2 text-sm">${a.time}</td>
             </tr>`).join('');
-                    const dot = document.getElementById('alert-dot');
-                    if (dot) dot.classList.toggle('hidden', alerts.length === 0);
-                } catch (e) { toast('报警数据加载失败：' + e.message, 'bg-red-500'); }
-            }
-            const alertSet = document.getElementById('alert-set');
-            if (alertSet) alertSet.addEventListener('click', () => {
-                alertThreshold = document.getElementById('alert-threshold')?.value || 20;
-                toast('阈值已更新');
-                loadAlerts();
-            });
-
-            /* ---------- 初始化 ---------- */
-            loadPlansAndModels();
-            loadReports();
+                const dot = document.getElementById('alert-dot');
+                if (dot) dot.classList.toggle('hidden', alerts.length === 0);
+            } catch (e) { toast('报警数据加载失败：' + e.message, 'bg-red-500'); }
+        }
+        const alertSet = document.getElementById('alert-set');
+        if (alertSet) alertSet.addEventListener('click', () => {
+            alertThreshold = document.getElementById('alert-threshold')?.value || 20;
+            toast('阈值已更新');
             loadAlerts();
+        });
+
+        /* ---------- 初始化 ---------- */
+        loadPlansAndModels();
+        loadReports();
+        loadAlerts();
     </script>
+
+    <!-- <script>
+        /* ---------- 假数据拦截器 ---------- */
+        const mockDB = {
+            plan: [
+                { id: 1, cropType: '小麦', fieldName: '东坡一号地' },
+                { id: 2, cropType: '水稻', fieldName: '西坡二号田' },
+                { id: 3, cropType: '玉米', fieldName: '后山实验田' }
+            ],
+            model: [
+                { id: 1, name: '线性回归-v1' },
+                { id: 2, name: '随机森林-v2' },
+                { id: 3, name: 'LSTM时序模型' }
+            ],
+            history: {
+                小麦: Array.from({ length: 30 }, (_, i) => ({
+                    date: new Date(Date.now() - i * 86400000).toISOString().slice(0, 10),
+                    avgPrice: (2.3 + Math.random() * 0.4).toFixed(2)
+                })).reverse(),
+                水稻: Array.from({ length: 30 }, (_, i) => ({
+                    date: new Date(Date.now() - i * 86400000).toISOString().slice(0, 10),
+                    avgPrice: (3.1 + Math.random() * 0.5).toFixed(2)
+                })).reverse(),
+                玉米: Array.from({ length: 30 }, (_, i) => ({
+                    date: new Date(Date.now() - i * 86400000).toISOString().slice(0, 10),
+                    avgPrice: (1.8 + Math.random() * 0.3).toFixed(2)
+                })).reverse()
+            },
+            ecommerce: {
+                小麦: [{ platform: '拼多多', price: '2.50' }, { platform: '京东', price: '2.80' }, { platform: '淘宝', price: '2.65' }],
+                水稻: [{ platform: '拼多多', price: '3.30' }, { platform: '京东', price: '3.60' }, { platform: '淘宝', price: '3.45' }],
+                玉米: [{ platform: '拼多多', price: '1.95' }, { platform: '京东', price: '2.10' }, { platform: '淘宝', price: '2.00' }]
+            },
+            suggest: {
+                小麦: { bestTime: '2025-06-15 ~ 2025-07-10', priceRange: '2.6 ~ 2.9', reason: '当前库存低，新粮未集中上市，价格坚挺。' },
+                水稻: { bestTime: '2025-09-01 ~ 2025-09-20', priceRange: '3.4 ~ 3.7', reason: '学校开学+中秋备货，需求端拉动。' },
+                玉米: { bestTime: '2025-10-05 ~ 2025-10-25', priceRange: '2.0 ~ 2.2', reason: '饲料厂冬季补库，价格阶段性高点。' }
+            },
+            alert: [
+                { crop: '小麦', currentPrice: '2.90', avgPrice: '2.45', ratio: +18.4, time: '2025-12-21 09:30' },
+                { crop: '玉米', currentPrice: '1.70', avgPrice: '2.00', ratio: -15.0, time: '2025-12-21 09:30' }
+            ],
+            report: [
+                { id: 1, title: '2025 小麦市场分析报告', createTime: '2025-12-20 10:00', creator: '分析师A' },
+                { id: 2, title: '2025 水稻价格走势回顾', createTime: '2025-12-19 16:20', creator: '分析师B' }
+            ]
+        };
+
+        window.fetch = new Proxy(window.fetch, {
+            apply(target, _, args) {
+                const [url, config] = args;
+                const method = config?.method || 'GET';
+                return new Promise((resolve) => {
+                    setTimeout(() => { // 模拟网络延迟
+                        let body = null;
+                        if (url.includes('/api/plan/my')) body = mockDB.plan;
+                        else if (url.includes('/analysis/yield/models')) body = mockDB.model;
+                        else if (url.includes('/analysis/yield/predict')) body = { estimatedYield: (4.2 + Math.random() * 0.8).toFixed(1), errorRange: '5.3', factor: '光照充足，预估提升 5%' };
+                        else if (url.includes('/analysis/market/history')) {
+                            const crop = url.split('/').pop();
+                            body = mockDB.history[crop] || [];
+                        }
+                        else if (url.includes('/analysis/ecommerce/compare')) {
+                            const crop = url.split('/').pop();
+                            body = mockDB.ecommerce[crop] || [];
+                        }
+                        else if (url.includes('/analysis/suggestion')) {
+                            const u = new URL(url, location.origin);
+                            const crop = u.searchParams.get('crop');
+                            body = mockDB.suggest[crop] || { bestTime: '暂无', priceRange: '暂无', reason: '数据缺失' };
+                        }
+                        else if (url.includes('/analysis/alert')) body = mockDB.alert;
+                        else if (url.includes('/analysis/report/list')) body = mockDB.report;
+                        else if (url.includes('/analysis/market/generate')) body = { id: Date.now(), title: '', content: '' };
+                        else {
+                            // 未匹配的接口直接返回空数组
+                            body = [];
+                        }
+                        resolve(new Response(JSON.stringify(body), { status: 200, headers: { 'Content-Type': 'application/json' } }));
+                    }, 300);
+                });
+            }
+        });
+
+        /* ---------- 原有业务代码直接保留 ---------- */
+        /* 以下代码与之前完全一致，无需改动即可继续跑 */
+        const $api = async (url, opts = {}) => {
+            const res = await fetch(url, { ...opts, headers: { 'Content-Type': 'application/json', ...opts.headers } });
+            if (!res.ok) throw new Error(await res.text());
+            return res.json();
+        };
+        function toast(msg, bg = 'bg-green-500') {
+            const box = document.createElement('div');
+            box.className = `fixed top-5 right-5 text-white px-4 py-2 rounded shadow-lg ${bg} z-50`;
+            box.textContent = msg;
+            document.body.appendChild(box);
+            setTimeout(() => box.remove(), 2500);
+        }
+        const tick = () => {
+            const el = document.getElementById('current-time');
+            if (el) el.textContent = new Date().toLocaleString('zh-CN');
+        };
+        tick(); setInterval(tick, 1000);
+        if (window.self !== window.top) {
+            const header = document.querySelector('header');
+            if (header) {
+                header.style.position = 'absolute';
+                header.style.visibility = 'hidden';
+                header.style.height = '0';
+                header.style.overflow = 'hidden';
+            }
+            document.body.classList.add('pt-0');
+        }
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                localStorage.removeItem('uid');
+                localStorage.removeItem('uname');
+                toast('已退出');
+                location.reload();
+            });
+        }
+        window.addEventListener('message', e => {
+            if (e.data?.action === 'setLogin' && e.data.uid) {
+                localStorage.setItem('uid', e.data.uid);
+                localStorage.setItem('uname', e.data.uname);
+            }
+        });
+        const navs = document.querySelectorAll('aside nav a');
+        const sections = document.querySelectorAll('main section');
+        navs.forEach(n => n.addEventListener('click', e => {
+            e.preventDefault();
+            const id = n.getAttribute('href').slice(1);
+            navs.forEach(x => x.classList.remove('nav-active'));
+            n.classList.add('nav-active');
+            sections.forEach(s => s.classList.add('section-hidden'));
+            document.getElementById(id)?.classList.remove('section-hidden');
+        }));
+        location.hash = 'yield';
+        navs[0]?.classList.add('nav-active');
+        async function loadPlansAndModels() {
+            try {
+                const plans = await $api('/api/plan/my');
+                const planSel = document.getElementById('yield-plan');
+                planSel.innerHTML = '<option value="">请选择种植计划</option>';
+                plans.forEach(p => planSel.innerHTML += `<option value="${p.id}">${p.cropType} - ${p.fieldName}</option>`);
+                const models = await $api('/analysis/yield/models/wheat');
+                const modelSel = document.getElementById('yield-model');
+                modelSel.innerHTML = '<option value="">请选择模型</option>';
+                models.forEach(m => modelSel.innerHTML += `<option value="${m.id}">${m.name}</option>`);
+            } catch (e) { toast('加载计划/模型失败：' + e.message, 'bg-red-500'); }
+        }
+        const yieldBtn = document.getElementById('yield-predict-btn');
+        if (yieldBtn) {
+            yieldBtn.addEventListener('click', async () => {
+                const planId = document.getElementById('yield-plan')?.value;
+                const modelId = document.getElementById('yield-model')?.value;
+                if (!planId || !modelId) return toast('请选择计划和模型', 'bg-orange-500');
+                try {
+                    const res = await $api('/analysis/yield/predict?planId=' + planId + '&modelId=' + modelId, { method: 'POST' });
+                    const box = document.getElementById('yield-result');
+                    if (box) box.classList.remove('hidden');
+                    const detail = document.getElementById('yield-detail');
+                    if (detail) detail.innerHTML = `
+            <div>预估产量：<span class="font-bold">${res.estimatedYield} 吨</span></div>
+            <div>误差范围：±${res.errorRange}%</div>
+            <div>影响因素：${res.factor || '光照充足，预估提升 5%'}</div>`;
+                } catch (e) { toast('预测失败：' + e.message, 'bg-red-500'); }
+            });
+        }
+        let marketChart;
+        const marketBtn = document.getElementById('market-query');
+        if (marketBtn) {
+            marketBtn.addEventListener('click', async () => {
+                const crop = document.getElementById('market-crop')?.value;
+                const range = document.getElementById('market-range')?.value;
+                if (!crop) return toast('请选择作物', 'bg-orange-500');
+                try {
+                    const history = await $api(`/analysis/market/history/${crop}`);
+                    const labels = history.map(h => h.date);
+                    const prices = history.map(h => h.avgPrice);
+                    const ctx = document.getElementById('market-chart')?.getContext('2d');
+                    if (ctx) {
+                        if (marketChart) marketChart.destroy();
+                        marketChart = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels,
+                                datasets: [{ label: '均价（元/斤）', data: prices, borderColor: '#22c55e', tension: 0.3 }]
+                            },
+                            options: { responsive: true, plugins: { legend: { display: false } } }
+                        });
+                    }
+                    const ecommerce = await $api(`/analysis/ecommerce/compare/${crop}`);
+                    const etbody = document.getElementById('ecommerce-tbody');
+                    if (etbody) etbody.innerHTML = ecommerce.map(e => `
+            <tr><td class="px-3 py-2 text-sm">${e.platform}</td><td class="px-3 py-2 text-sm">${e.price}</td></tr>`).join('');
+                } catch (e) { toast('市场数据加载失败：' + e.message, 'bg-red-500'); }
+            });
+        }
+        const suggestBtn = document.getElementById('suggest-query');
+        if (suggestBtn) {
+            suggestBtn.addEventListener('click', async () => {
+                const crop = document.getElementById('suggest-crop')?.value;
+                const channel = document.getElementById('suggest-channel')?.value;
+                if (!crop) return toast('请选择作物', 'bg-orange-500');
+                try {
+                    const res = await $api(`/analysis/suggestion?crop=${crop}&channel=${channel || ''}`);
+                    const box = document.getElementById('suggest-result');
+                    if (box) box.classList.remove('hidden');
+                    const detail = document.getElementById('suggest-detail');
+                    if (detail) detail.innerHTML = `
+            <div>最佳销售时间：<span class="font-bold">${res.bestTime}</span></div>
+            <div>建议价格区间：${res.priceRange} 元/斤</div>
+            <div>渠道建议：${channel || '通用'}</div>
+            <div>依据：${res.reason}</div>`;
+                } catch (e) { toast('建议加载失败：' + e.message, 'bg-red-500'); }
+            });
+        }
+        function loadReports() {
+            const mock = mockDB.report;
+            const tbody = document.getElementById('report-tbody');
+            if (tbody) tbody.innerHTML = mock.map(r => `
+        <tr>
+          <td class="px-3 py-2 text-sm">${r.title}</td>
+          <td class="px-3 py-2 text-sm">${r.createTime}</td>
+          <td class="px-3 py-2 text-sm">${r.creator}</td>
+          <td class="px-3 py-2 text-sm space-x-1">
+            <button class="text-primary hover:underline text-xs" onclick="viewReport(${r.id})">查看</button>
+            <button class="text-primary hover:underline text-xs" onclick="exportReport(${r.id})">导出</button>
+          </td>
+        </tr>`).join('');
+        }
+        const reportCreate = document.getElementById('report-create');
+        const reportSave = document.getElementById('report-save');
+        const reportCancel = document.getElementById('report-cancel');
+        if (reportCreate) reportCreate.addEventListener('click', () => document.getElementById('report-modal')?.classList.remove('hidden'));
+        if (reportCancel) reportCancel.addEventListener('click', () => document.getElementById('report-modal')?.classList.add('hidden'));
+        if (reportSave) reportSave.addEventListener('click', async () => {
+            const title = document.getElementById('report-title')?.value;
+            const content = document.getElementById('report-editor')?.innerText;
+            if (!title || !content) return toast('请填写标题和内容', 'bg-orange-500');
+            try {
+                await $api('/analysis/market/generate?cropType=' + title, { method: 'POST', body: JSON.stringify({ title, content }) });
+                toast('保存成功');
+                loadReports();
+                document.getElementById('report-modal')?.classList.add('hidden');
+            } catch (e) { toast('保存失败：' + e.message, 'bg-red-500'); }
+        });
+        function viewReport(id) { toast('查看功能待实现', 'bg-blue-500'); }
+        function exportReport(id) { toast('导出功能待实现', 'bg-blue-500'); }
+        let alertThreshold = 20;
+        async function loadAlerts() {
+            try {
+                const alerts = await $api(`/analysis/alert?threshold=${alertThreshold}`);
+                const tbody = document.getElementById('alert-tbody');
+                if (tbody) tbody.innerHTML = alerts.map(a => `
+          <tr>
+            <td class="px-3 py-2 text-sm">${a.crop}</td>
+            <td class="px-3 py-2 text-sm">${a.currentPrice}</td>
+            <td class="px-3 py-2 text-sm">${a.avgPrice}</td>
+            <td class="px-3 py-2 text-sm ${a.ratio > 0 ? 'text-red-600' : 'text-green-600'}">${a.ratio > 0 ? '+' : ''}${a.ratio}%</td>
+            <td class="px-3 py-2 text-sm">${a.time}</td>
+          </tr>`).join('');
+                const dot = document.getElementById('alert-dot');
+                if (dot) dot.classList.toggle('hidden', alerts.length === 0);
+            } catch (e) { toast('报警数据加载失败：' + e.message, 'bg-red-500'); }
+        }
+        const alertSet = document.getElementById('alert-set');
+        if (alertSet) alertSet.addEventListener('click', () => {
+            alertThreshold = document.getElementById('alert-threshold')?.value || 20;
+            toast('阈值已更新');
+            loadAlerts();
+        });
+        loadPlansAndModels();
+        loadReports();
+        loadAlerts();
+    </script> -->
 </body>
 
 </html>

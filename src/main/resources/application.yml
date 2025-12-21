@@ -18,11 +18,13 @@ spring:
 platform:
   audit:
     enable: true
-
+    
 mybatis:
+  mapper-locations: classpath:mapper/planning/*.xml
   configuration:
     map-underscore-to-camel-case: true
     default-enum-type-handler: org.apache.ibatis.type.EnumTypeHandler
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     
 
 logging:
@@ -30,3 +32,16 @@ logging:
     com.agri.platform: debug
     org.springframework.jdbc.core: debug
     root: INFO
+    # Spring 启动时扫描 Mapper 接口
+    org.mybatis.spring.mapper.MapperFactoryBean: TRACE
+    org.mybatis.spring.SqlSessionFactoryBean: TRACE
+    # MyBatis 核心内部
+    org.apache.ibatis: TRACE
+    org.apache.ibatis.builder: TRACE
+    org.apache.ibatis.binding: TRACE
+    org.apache.ibatis.session: TRACE
+    org.apache.ibatis.executor: TRACE
+    org.apache.ibatis.parsing: TRACE
+    org.apache.ibatis.datasource: TRACE
+    org.apache.ibatis.transaction: TRACE
+    org.apache.ibatis.cache: TRACE
