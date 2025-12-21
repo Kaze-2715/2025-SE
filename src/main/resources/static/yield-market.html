@@ -481,29 +481,48 @@
         function exportReport(id) { toast('导出功能待实现', 'bg-blue-500'); }
 
         /* ---------- 价格波动报警 ---------- */
-        let alertThreshold = 20;
         async function loadAlerts() {
             try {
-                const alerts = await $api(`/analysis/alert?threshold=${alertThreshold}`);
+                // 1. 读取用户刚设好的阈值（默认 20）
+                const threshold = Number(document.getElementById('alert-threshold').value) || 20;
+
+                // 2. 调接口拿最新数据
+                const alerts = await $api(`/analysis/alert?crop=小麦&threshold=${threshold}`);
+
+                // 3. 前端二次过滤：只保留 |rate| ≥ threshold 的行
+                const validList = (Array.isArray(alerts) ? alerts : [alerts])
+                    .filter(a => Math.abs(a.rate * 100) >= threshold);
+
+                // 4. 渲染表格
                 const tbody = document.getElementById('alert-tbody');
-                if (tbody) tbody.innerHTML = alerts.map(a => `
-            <tr>
-                <td class="px-3 py-2 text-sm">${a.crop}</td>
-                <td class="px-3 py-2 text-sm">${a.currentPrice}</td>
-                <td class="px-3 py-2 text-sm">${a.avgPrice}</td>
-                <td class="px-3 py-2 text-sm ${a.ratio > 0 ? 'text-red-600' : 'text-green-600'}">${a.ratio > 0 ? '+' : ''}${a.ratio}%</td>
-                <td class="px-3 py-2 text-sm">${a.time}</td>
-            </tr>`).join('');
-                const dot = document.getElementById('alert-dot');
-                if (dot) dot.classList.toggle('hidden', alerts.length === 0);
-            } catch (e) { toast('报警数据加载失败：' + e.message, 'bg-red-500'); }
+                tbody.innerHTML = validList.length
+                    ? validList.map(a => `
+          <tr>
+            <td class="px-3 py-2 text-sm">${a.crop ?? ''}</td>
+            <td class="px-3 py-2 text-sm">${a.currentPrice ?? ''}</td>
+            <td class="px-3 py-2 text-sm">${a.avgPrice ?? ''}</td>
+            <td class="px-3 py-2 text-sm ${a.rate > 0 ? 'text-red-600' : 'text-green-600'}">
+              ${a.rate > 0 ? '+' : ''}${(a.rate * 100).toFixed(1)}%
+            </td>
+            <td class="px-3 py-2 text-sm">${a.time ?? ''}</td>
+          </tr>`).join('')
+                    : `<tr><td colspan="5" class="text-center text-sm text-gray-400 py-4">暂无价格波动预警</td></tr>`;
+
+                // 5. 顶部铃铛小红点
+                document.getElementById('alert-dot').classList.toggle('hidden', validList.length === 0);
+            } catch (e) {
+                toast('报警数据加载失败：' + e.message, 'bg-red-500');
+            }
         }
+
+        /* ---------- 绑定【设置】按钮 ---------- */
         const alertSet = document.getElementById('alert-set');
-        if (alertSet) alertSet.addEventListener('click', () => {
-            alertThreshold = document.getElementById('alert-threshold')?.value || 20;
-            toast('阈值已更新');
-            loadAlerts();
-        });
+        if (alertSet) {
+            alertSet.addEventListener('click', () => {
+                toast('阈值已更新');
+                loadAlerts();   // 重新拉数据+过滤
+            });
+        }
 
         /* ---------- 初始化 ---------- */
         loadPlansAndModels();

@@ -1,6 +1,7 @@
 // src/main/java/com/agri/platform/mapper/analysis/EcommerceDataMapper.java
 package com.agri.platform.mapper.analysis;
 
+import com.agri.platform.controller.analysis.PriceFluctuationController.PriceTrendResp;
 import com.agri.platform.entity.analysis.EcommerceData;
 
 import org.apache.ibatis.annotations.Delete;
@@ -14,6 +15,7 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.annotations.Param;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -79,4 +81,21 @@ public interface EcommerceDataMapper {
     /* ==================== 清理老数据 ==================== */
     @Delete("DELETE FROM t_ecommerce_data WHERE crawl_time < #{time}")
     int deleteOlderThan(LocalDateTime time);
+
+    /** 最新电商均价（今日零售） */
+    @Select("SELECT AVG(price) FROM t_ecommerce_data " +
+            "WHERE crop_type = #{crop} " +
+            "  AND crawl_time >= CURDATE() " +
+            "GROUP BY crop_type")
+    BigDecimal selectLatestRetail(@Param("crop") String crop);
+
+    /** 最近 N 天电商均价（每天一条） */
+    @Select("SELECT DATE(crawl_time) AS date, AVG(price) AS price " +
+            "FROM t_ecommerce_data " +
+            "WHERE crop_type = #{crop} " +
+            "  AND crawl_time >= DATE_SUB(CURDATE(), INTERVAL #{days} DAY) " +
+            "GROUP BY DATE(crawl_time) " +
+            "ORDER BY date")
+    List<PriceTrendResp> selectTrendRetail(@Param("crop") String crop,
+                                           @Param("days") int days);
 }
