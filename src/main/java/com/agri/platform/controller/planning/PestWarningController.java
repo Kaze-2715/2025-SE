@@ -29,4 +29,11 @@ public class PestWarningController {
     public List<PestWarning> getByLevel(@PathVariable Integer level) {
         return pestWarningMapper.selectByWarningLevel(level);
     }
+    
+    // 查询所有预警数据
+    // 访问：GET http://localhost:8080/pest-warning/list
+    @GetMapping("/list")
+    public List<PestWarning> getAllWarnings() {
+        return pestWarningMapper.selectAll();
+    }
 }

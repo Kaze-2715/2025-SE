@@ -16,6 +16,13 @@ public class WarningHandleRecordController {
     @Autowired
     private WarningHandleRecordMapper recordMapper;
 
+    // 查询所有处理记录
+    // 访问：GET http://localhost:8080/warning-handle/list
+    @GetMapping("/list")
+    public List<WarningHandleRecord> getAllRecords() {
+        return recordMapper.selectAll();
+    }
+
     // 新增处理记录
     // 访问：POST http://localhost:8080/warning-handle/add
     @PostMapping("/add")
