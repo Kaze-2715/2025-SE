@@ -16,8 +16,14 @@ public interface WarningHandleRecordMapper {
     @Select("SELECT * FROM warning_handle_record")
     List<WarningHandleRecord> selectAll();
     
+    @Select("SELECT * FROM warning_handle_record WHERE farmer_id = #{userId}")
+    List<WarningHandleRecord> selectByUserId(String userId);
+    
     @Select("SELECT * FROM warning_handle_record WHERE warning_id = #{warningId}")
     List<WarningHandleRecord> selectByWarningId(Long warningId); // 改回Long类型
+    
+    @Select("SELECT * FROM warning_handle_record WHERE warning_id = #{warningId} AND farmer_id = #{userId}")
+    List<WarningHandleRecord> selectByWarningIdAndUserId(Long warningId, String userId);
     
     @Select("SELECT * FROM warning_handle_record WHERE record_id = #{recordId}")
     WarningHandleRecord selectById(Long recordId); // 改回Long类型

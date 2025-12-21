@@ -1,14 +1,6 @@
 package com.agri.platform.mapper.planning;
 
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Update;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Options;
-import org.apache.ibatis.annotations.Result;
-import org.apache.ibatis.annotations.ResultMap;
-import org.apache.ibatis.annotations.Results;
+import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.type.JdbcType;
 
 import com.agri.platform.entity.planning.PestWarning;
@@ -67,4 +59,15 @@ public interface PestWarningMapper {
 
     @Delete("DELETE FROM pest_warning WHERE warning_id = #{warningId}")
     int deleteById(Long warningId);
+
+    @Select("SELECT pw.* FROM pest_warning pw JOIN land l ON pw.land_id = l.id WHERE l.user_id = #{userId}")
+    List<PestWarning> selectByUserId(@Param("userId") String userId);
+
+    // 新增：按用户ID和处理状态查询
+    @Select("SELECT pw.* FROM pest_warning pw JOIN land l ON pw.land_id = l.id WHERE l.user_id = #{userId} AND pw.handle_status = #{status}")
+    List<PestWarning> selectByUserIdAndHandleStatus(@Param("userId") String userId, @Param("status") Integer status);
+
+    // 新增：按用户ID和预警等级查询
+    @Select("SELECT pw.* FROM pest_warning pw JOIN land l ON pw.land_id = l.id WHERE l.user_id = #{userId} AND pw.warning_level = #{level}")
+    List<PestWarning> selectByUserIdAndWarningLevel(@Param("userId") String userId, @Param("level") Integer level);
 }

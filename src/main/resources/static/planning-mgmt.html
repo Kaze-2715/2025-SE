@@ -905,23 +905,26 @@ body.iframe-embedded .mt-32 {
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">种植地块</label>
-                        <div class="grid grid-cols-3 gap-2">
-                            <label
-                                class="flex items-center space-x-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                <input type="checkbox" class="form-checkbox text-primary rounded">
-                                <span>1号地块</span>
-                            </label>
-                            <label
-                                class="flex items-center space-x-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                <input type="checkbox" class="form-checkbox text-primary rounded">
-                                <span>2号地块</span>
-                            </label>
-                            <label
-                                class="flex items-center space-x-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                <input type="checkbox" class="form-checkbox text-primary rounded">
-                                <span>3号地块</span>
-                            </label>
-                        </div>
+<!--                        <div class="grid grid-cols-3 gap-2">-->
+<!--                            <label-->
+<!--                                class="flex items-center space-x-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">-->
+<!--                                <input type="checkbox" class="form-checkbox text-primary rounded">-->
+<!--                                <span>1号地块</span>-->
+<!--                            </label>-->
+<!--                            <label-->
+<!--                                class="flex items-center space-x-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">-->
+<!--                                <input type="checkbox" class="form-checkbox text-primary rounded">-->
+<!--                                <span>2号地块</span>-->
+<!--                            </label>-->
+<!--                            <label-->
+<!--                                class="flex items-center space-x-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">-->
+<!--                                <input type="checkbox" class="form-checkbox text-primary rounded">-->
+<!--                                <span>3号地块</span>-->
+<!--                            </label>-->
+<!--                        </div>-->
+                        <select name="land" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50">
+                            <option value="">请选择地块</option>
+                        </select>
                     </div>
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-1">备注说明</label>
@@ -1002,23 +1005,26 @@ body.iframe-embedded .mt-32 {
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">种植地块</label>
-                        <div class="grid grid-cols-3 gap-2">
-                            <label
-                                class="flex items-center space-x-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                <input type="checkbox" class="form-checkbox text-primary rounded">
-                                <span>1号地块</span>
-                            </label>
-                            <label
-                                class="flex items-center space-x-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                <input type="checkbox" class="form-checkbox text-primary rounded">
-                                <span>2号地块</span>
-                            </label>
-                            <label
-                                class="flex items-center space-x-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                <input type="checkbox" class="form-checkbox text-primary rounded">
-                                <span>3号地块</span>
-                            </label>
-                        </div>
+<!--                        <div class="grid grid-cols-3 gap-2">-->
+<!--                            <label-->
+<!--                                class="flex items-center space-x-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">-->
+<!--                                <input type="checkbox" class="form-checkbox text-primary rounded">-->
+<!--                                <span>1号地块</span>-->
+<!--                            </label>-->
+<!--                            <label-->
+<!--                                class="flex items-center space-x-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">-->
+<!--                                <input type="checkbox" class="form-checkbox text-primary rounded">-->
+<!--                                <span>2号地块</span>-->
+<!--                            </label>-->
+<!--                            <label-->
+<!--                                class="flex items-center space-x-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">-->
+<!--                                <input type="checkbox" class="form-checkbox text-primary rounded">-->
+<!--                                <span>3号地块</span>-->
+<!--                            </label>-->
+<!--                        </div>-->
+                        <select name="land" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50">
+                            <option value="">请选择地块</option>
+                        </select>
                     </div>
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-1">备注说明</label>
@@ -1954,6 +1960,9 @@ body.iframe-embedded .mt-32 {
         // DOMContentLoaded事件监听器 - 页面加载完成后执行
         document.addEventListener('DOMContentLoaded', function () {
 
+            // 加载地块数据
+            loadLands();
+
             const navLinks = document.querySelectorAll('aside nav a');
             const sections = document.querySelectorAll('main section');
 
@@ -2087,6 +2096,87 @@ body.iframe-embedded .mt-32 {
         document.getElementById('go-profile').addEventListener('click', () => {
             location.href = '/user-mgmt.html#profile';
         });
+
+        // 加载地块数据
+        function loadLands() {
+            fetch('/api/lands')
+                .then(response => {
+                if (!response.ok) {
+                    throw new Error('网络请求失败');
+                }
+                return response.json();
+            })
+            .then(lands => {
+                // 更新统计信息
+                updateFarmInfoWithLands(lands);
+                // 更新种植规划中的地块选择器
+                updateLandSelectors(lands);
+            })
+            .catch(error => {
+                console.error('加载地块数据失败:', error);
+            });
+        }
+
+        // 使用地块数据更新农场信息
+        function updateFarmInfoWithLands(lands) {
+            let totalArea = 0;
+
+            // 计算总种植面积（平方米转换为亩，1亩≈666.67平方米）
+            lands.forEach(land => {
+                const area = parseFloat(land.area);
+                if (!isNaN(area)) {
+                    totalArea += area / 666.67;
+                }
+            });
+
+            // 更新农场信息卡片
+            const farmInfoArea = document.querySelector('.bg-primary\\/5 .space-y-2 div:nth-child(1) span:last-child');
+
+            if (farmInfoArea) {
+                farmInfoArea.textContent = totalArea.toFixed(1) + ' 亩';
+            }
+        }
+
+        // 更新地块选择器
+<!--        function updateLandSelectors(lands) {-->
+<!--            // 更新新增种植规划模态框-->
+<!--            const addPlanLandContainer = document.querySelector('#add-plan-form .grid.grid-cols-3.gap-2');-->
+<!--            // 更新编辑种植规划模态框-->
+<!--            const editPlanLandContainer = document.querySelector('#edit-plan-form .grid.grid-cols-3.gap-2');-->
+
+<!--            const landCheckboxes = lands.map(land => `-->
+<!--                <label class="flex items-center space-x-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">-->
+<!--                    <input type="checkbox" class="form-checkbox text-primary rounded" value="${land.landId}">-->
+<!--                    <span>${land.landId}</span>-->
+<!--                </label>-->
+<!--            `).join('');-->
+
+<!--            if (addPlanLandContainer) {-->
+<!--                addPlanLandContainer.innerHTML = landCheckboxes;-->
+<!--            }-->
+
+<!--            if (editPlanLandContainer) {-->
+<!--                editPlanLandContainer.innerHTML = landCheckboxes;-->
+<!--            }-->
+<!--        }-->
+        // 更新地块选择器
+        function updateLandSelectors(lands) {
+            // 更新新增种植规划模态框
+            const addPlanLandSelect = document.querySelector('#add-plan-form select[name="land"]');
+            // 更新编辑种植规划模态框
+            const editPlanLandSelect = document.querySelector('#edit-plan-form select[name="land"]');
+
+            const landOptions = lands.map(land => `<option value="${land.landId}">${land.landId}</option>`).join('');
+
+            if (addPlanLandSelect) {
+                addPlanLandSelect.innerHTML = '<option value="">请选择地块</option>' + landOptions;
+            }
+
+            if (editPlanLandSelect) {
+                editPlanLandSelect.innerHTML = '<option value="">请选择地块</option>' + landOptions;
+            }
+        }
+
     </script>
 </body>
 

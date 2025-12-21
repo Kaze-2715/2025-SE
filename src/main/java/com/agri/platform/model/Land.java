@@ -10,13 +10,15 @@ public class Land {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String landId; // 用户录入的土地ID（可与数据库id不同）
-    private Double area; // 面积
+    private String landId;
+    private Double area;
     private String soilType;
-    private String attachmentPath; // 上传的附件（可选）
-
+    private String attachmentPath;
+    private String userId; // 新增用户ID字段
 
     // getters / setters
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getLandId() { return landId; }
