@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 public class PlantingPlan {
     // 移除MyBatis-Plus的@TableId注解
     private Long planId; // 计划ID（对应表中plan_id）
-    private Long farmerId; // 农场主ID（关联用户表id）
+    private String farmerId; // 农场主ID（关联用户表id）
     private String cropType; // 作物类型
     private BigDecimal plantingArea; // 种植面积（亩）
     private LocalDate plantingTime; // 种植时间

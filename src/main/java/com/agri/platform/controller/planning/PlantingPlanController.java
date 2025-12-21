@@ -3,11 +3,14 @@ package com.agri.platform.controller.planning;
 import com.agri.platform.entity.planning.PlantingPlan;
 import com.agri.platform.service.planning.PlantingPlanService;
 
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@Slf4j
 @RequestMapping("/planting-plan") // 接口前缀
 public class PlantingPlanController {
     @Autowired
@@ -29,7 +32,8 @@ public class PlantingPlanController {
     // 按农场主ID查询计划
     // 访问方式：GET http://localhost:8080/planting-plan/farmer/1（1是农场主ID）
     @GetMapping("/farmer/{farmerId}")
-    public List<PlantingPlan> getPlansByFarmer(@PathVariable Long farmerId) {
-        return plantingPlanService.getPlansByFarmerId(farmerId);
+    public List<PlantingPlan> getPlansByFarmer(@PathVariable String farmerId) {
+        List<PlantingPlan> list = plantingPlanService.getPlansByFarmerId(farmerId);
+        return list;
     }
 }
