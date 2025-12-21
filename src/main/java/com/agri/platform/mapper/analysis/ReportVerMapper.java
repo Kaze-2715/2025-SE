@@ -17,7 +17,7 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 @Mapper
-public interface ReportVersionMapper {
+public interface ReportVerMapper {
     /* ==================== 查询 ==================== */
     @Select("SELECT version_id, report_id, report_type, version_number, change_log, " +
             "created_by, create_time, is_current " +

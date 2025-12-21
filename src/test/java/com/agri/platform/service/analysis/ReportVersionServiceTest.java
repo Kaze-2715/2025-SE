@@ -1,7 +1,7 @@
 package com.agri.platform.service.analysis;
 
 import com.agri.platform.entity.analysis.ReportVersion;
-import com.agri.platform.mapper.analysis.ReportVersionMapper;
+import com.agri.platform.mapper.analysis.ReportVerMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,7 +19,7 @@ import static org.mockito.Mockito.*;
 public class ReportVersionServiceTest {
 
     @Mock
-    private ReportVersionMapper versionMapper;
+    private ReportVerMapper versionMapper;
 
     @InjectMocks
     private ReportVersionServiceImpl versionService;

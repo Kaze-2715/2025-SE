@@ -2,7 +2,7 @@
 package com.agri.platform.service.analysis;
 
 import com.agri.platform.entity.analysis.ReportVersion;
-import com.agri.platform.mapper.analysis.ReportVersionMapper;
+import com.agri.platform.mapper.analysis.ReportVerMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,7 +13,7 @@ import java.util.List;
 public class ReportVersionServiceImpl implements ReportVersionService {
 
     @Autowired
-    private ReportVersionMapper versionMapper;
+    private ReportVerMapper versionMapper;
 
     @Override
     @Transactional
