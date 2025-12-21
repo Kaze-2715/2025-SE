@@ -5,6 +5,7 @@
 <head>
     <meta charset="utf-8" />
     <title>智慧农业 - 主控制台</title>
+    <link rel="icon" href="/assets/img/nputxt.ico" type="image/x-icon">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <style>
@@ -32,16 +33,19 @@
 
                 <!-- 中间一排按钮 -->
                 <nav class="flex space-x-2">
-                    <button onclick="showPage('/planning-mgmt.html')"
+                    <!-- 农场主 -->
+                    <button data-role="farm_owner" onclick="showPage('/planning-mgmt.html')"
                         class="px-3 py-1.5 rounded hover:bg-primary/20 text-white hover:text-primary transition-colors">种植监控</button>
-                    <button onclick="showPage('/user-mgmt.html')"
-                        class="px-3 py-1.5 rounded hover:bg-primary/20 text-white hover:text-primary transition-colors">用户中心</button>
-                    <button onclick="showPage('/yield-market.html')"
-                        class="px-3 py-1.5 rounded hover:bg-primary/20 text-white hover:text-primary transition-colors">产量市场</button>
-                    <button onclick="showPage('/farm_owner2.html')"
+                    <button data-role="farm_owner" onclick="showPage('/farm_owner2.html')"
                         class="px-3 py-1.5 rounded hover:bg-primary/20 text-white hover:text-primary transition-colors">土地管理</button>
-                    <button onclick="showPage('/tech_advisor2.html')"
+                    <button data-role="farm_owner" onclick="showPage('/tech_advisor2.html')"
                         class="px-3 py-1.5 rounded hover:bg-primary/20 text-white hover:text-primary transition-colors">技术顾问</button>
+                    <!-- 管理员 -->
+                    <button data-role="sys_admin" onclick="showPage('/user-role.html')"
+                        class="px-3 py-1.5 rounded hover:bg-primary/20 text-white hover:text-primary transition-colors">用户中心</button>
+                    <!-- 数据分析师 -->
+                    <button data-role="data_analyst" onclick="showPage('/yield-market.html')"
+                        class="px-3 py-1.5 rounded hover:bg-primary/20 text-white hover:text-primary transition-colors">产量市场</button>
                 </nav>
 
                 <!-- 右侧头像下拉 -->
@@ -67,41 +71,55 @@
     <iframe id="content-frame" src="/planning-mgmt.html" class="pt-4 pb-4"></iframe>
 
     <script>
-        /* 读取登录态（示例） */
-        window.addEventListener('DOMContentLoaded', () => {
+        /* ====== 调试：不跳转，只看数据 ====== */
+        (function () {
+            const rolesRaw = localStorage.getItem('roles');
             const uname = localStorage.getItem('uname');
+            console.log('=== 本地存储 ===');
+            console.log('uid:  ', localStorage.getItem('uid'));
+            console.log('uname:', uname);
+            console.log('roles:', rolesRaw);
+
+            /* 写用户名 */
             if (uname) document.getElementById('top-username').textContent = uname;
-        });
-        /* 切换页面 */
+
+            /* 暂时不跳转，只打印警告 */
+            if (!rolesRaw || rolesRaw === 'undefined') {
+                console.warn('⚠ 没有可用角色，正常会跳 /login.html');
+                location.href = '/login.html';   // ← 先注释掉！
+                return;
+            }
+
+            /* 有角色再解析按钮权限 */
+            const roles = JSON.parse(rolesRaw);
+            document.querySelectorAll('nav button[data-role]').forEach(btn => {
+                const need = btn.dataset.role.split(',').map(r => r.trim());
+                const ok = need.some(r => roles.includes(r));
+                btn.style.display = ok ? 'inline-block' : 'none';
+            });
+        })();
+
+        /* ====== 其余原有代码 ====== */
         function showPage(page) {
             const iframe = document.getElementById('content-frame');
             const uid = localStorage.getItem('uid');
-            const uname = localStorage.getItem('uname');
             if (!uid) {
                 location.href = '/user-mgmt.html';
                 return;
             }
-
-            /* 1. 先设地址 */
             const target = page.endsWith('user-mgmt.html') ? page + '#role' : page;
             iframe.src = target;
-
-            /* 2. 等 iframe 加载完再发消息 */
             iframe.onload = () => {
-                // 必须用 contentWindow，且等加载完
-                iframe.contentWindow.postMessage(
-                    { action: 'setLogin', uid: uid, uname: uname },
-                    '*'   // 或写精确 origin：'http://yourdomain.com'
-                );
+                iframe.contentWindow.postMessage({ action: 'setLogin', uid: uid, uname: localStorage.getItem('uname') }, '*');
             };
         }
+        document.getElementById('go-profile').addEventListener('click', () => {
+            showPage('/user-profile.html');
+        });
 
         document.getElementById('logout-btn').addEventListener('click', () => {
             localStorage.clear();
-            location.reload();
-        });
-        document.getElementById('go-profile').addEventListener('click', () => {
-            document.getElementById('content-frame').src = 'user-mgmt.html#profile';
+            location.href = 'homepage.html';
         });
     </script>
 </body>
