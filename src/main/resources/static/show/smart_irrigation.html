@@ -34,24 +34,24 @@
                 @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
             }
             .section-padding {
-                @apply py-16 md:py-20; /* 精简间距，更轻量化 */
+                @apply py-16 md:py-24;
             }
         }
     </style>
 </head>
 <body class="bg-white text-dark font-sans">
-<!-- 导航栏（统一风格） -->
+<!-- 导航栏 -->
 <nav class="bg-white shadow-sm fixed w-full top-0 z-50">
     <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-        <a href="#" class="flex items-center gap-2 text-primary font-bold text-xl">
+        <a href="../homepage.html#features" class="flex items-center gap-2 text-primary font-bold text-xl">
             <i class="fas fa-leaf"></i>
             <span>Agri Platform</span>
         </a>
         <div class="hidden md:flex items-center gap-6">
-            <a href="#" class="text-gray-600 hover:text-primary transition-colors">首页</a>
-            <a href="#" class="text-primary font-medium">功能介绍</a>
-            <a href="#" class="text-gray-600 hover:text-primary transition-colors">解决方案</a>
-            <a href="#" class="text-gray-600 hover:text-primary transition-colors">关于我们</a>
+            <a href="../homepage.html#features" class="text-gray-600 hover:text-primary transition-colors">首页</a>
+            <a href="#features" class="text-gray-600 hover:text-primary transition-colors">功能介绍</a>
+            <a href="#scenarios" class="text-gray-600 hover:text-primary transition-colors">应用场景</a>
+            <a href="#about-us" class="text-gray-600 hover:text-primary transition-colors">关于我们</a>
         </div>
         <a href="#" class="px-5 py-2 rounded-full bg-primary text-white hover:bg-secondary transition-colors">
             立即体验
@@ -59,22 +59,26 @@
     </div>
 </nav>
 
-<!-- 头部banner（精简版） -->
-<header class="pt-32 pb-16 bg-gradient-to-br from-primary/5 to-secondary/5">
-    <div class="container mx-auto px-4 flex flex-col md:flex-row items-center gap-8">
-        <div class="md:w-1/2 space-y-5">
+<!-- 头部banner（统一结构） -->
+<header class="pt-32 pb-20 bg-gradient-to-br from-primary/5 to-secondary/5">
+    <div class="container mx-auto px-4 flex flex-col md:flex-row items-center gap-10">
+        <div class="md:w-1/2 space-y-6">
                 <span class="inline-block px-4 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">
                     核心功能
                 </span>
-            <h1 class="text-[clamp(1.8rem,5vw,3rem)] font-bold leading-tight">
+            <h1 class="text-[clamp(2rem,5vw,3.5rem)] font-bold leading-tight">
                 智能灌溉<br>精准控水 省工省水
             </h1>
             <p class="text-gray-600 text-lg">
-                基于土壤墒情自动启停灌溉，按需供水，告别人工值守，节水又高效
+                基于土壤墒情与作物需求自动调控灌溉，告别人工值守，节水30%以上，
+                让每一滴水都用在实处
             </p>
-            <div class="flex flex-wrap gap-4 pt-2">
+            <div class="flex flex-wrap gap-4 pt-4">
                 <a href="#features" class="px-6 py-3 rounded-lg bg-primary text-white hover:bg-secondary transition-colors">
-                    了解详情
+                    了解功能详情
+                </a>
+                <a href="#advantage" class="px-6 py-3 rounded-lg border border-primary text-primary hover:bg-primary/5 transition-colors">
+                    查看核心优势
                 </a>
             </div>
         </div>
@@ -84,84 +88,137 @@
     </div>
 </header>
 
-<!-- 核心功能（极简版，仅3个核心点） -->
+<!-- 核心功能（统一布局） -->
 <section id="features" class="section-padding bg-white">
     <div class="container mx-auto px-4">
-        <div class="text-center max-w-2xl mx-auto mb-12">
-            <h2 class="text-[clamp(1.5rem,4vw,2.5rem)] font-bold mb-4">核心能力</h2>
-            <p class="text-gray-600">
-                简单实用，满足灌溉核心需求
+        <div class="text-center max-w-3xl mx-auto mb-16">
+            <h2 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold mb-4">核心功能</h2>
+            <p class="text-gray-600 text-lg">
+                简单实用，覆盖灌溉全场景核心需求
             </p>
         </div>
 
-        <!-- 功能卡片（仅3个，精简） -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- 功能卡片（统一样式） -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <!-- 自动灌溉 -->
-            <div class="bg-neutral rounded-xl p-8 card-hover border border-gray-100 text-center">
-                <div class="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mb-5 mx-auto">
+            <div class="bg-neutral rounded-xl p-8 card-hover border border-gray-100">
+                <div class="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mb-6">
                     <i class="fas fa-tint text-primary text-2xl"></i>
                 </div>
                 <h3 class="text-xl font-bold mb-3">自动灌溉</h3>
                 <p class="text-gray-600">
-                    土壤缺水自动开启，达标自动停止，无需人工干预
+                    基于土壤墒情传感器数据，缺水自动开启灌溉，达标自动停止，无需人工干预
                 </p>
             </div>
 
             <!-- 远程控制 -->
-            <div class="bg-neutral rounded-xl p-8 card-hover border border-gray-100 text-center">
-                <div class="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mb-5 mx-auto">
+            <div class="bg-neutral rounded-xl p-8 card-hover border border-gray-100">
+                <div class="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mb-6">
                     <i class="fas fa-mobile-alt text-primary text-2xl"></i>
                 </div>
                 <h3 class="text-xl font-bold mb-3">远程控制</h3>
                 <p class="text-gray-600">
-                    手机/电脑一键启停，随时随地管理灌溉设备
+                    手机/电脑端一键启停灌溉设备，支持定时、定量灌溉，随时随地管理
                 </p>
             </div>
 
             <!-- 节水节能 -->
-            <div class="bg-neutral rounded-xl p-8 card-hover border border-gray-100 text-center">
-                <div class="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mb-5 mx-auto">
+            <div class="bg-neutral rounded-xl p-8 card-hover border border-gray-100">
+                <div class="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mb-6">
                     <i class="fas fa-leaf text-primary text-2xl"></i>
                 </div>
                 <h3 class="text-xl font-bold mb-3">节水节能</h3>
                 <p class="text-gray-600">
-                    按需供水，相比传统灌溉节水30%以上
+                    按需精准供水，相比传统漫灌节水30%以上，降低水电成本与人力投入
                 </p>
+            </div>
+        </div>
+
+        <!-- 辅助功能（统一模块结构） -->
+        <div class="mt-12 bg-white rounded-xl shadow-md p-8 border border-gray-100">
+            <h3 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                <i class="fas fa-faucet text-primary"></i>
+                精细化灌溉能力
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="flex gap-4 items-start">
+                    <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center shrink-0 mt-1">
+                        <i class="fas fa-clock text-primary"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold mb-2">定时灌溉</h4>
+                        <p class="text-gray-600 text-sm">自定义灌溉时段，适配不同作物生长周期</p>
+                    </div>
+                </div>
+                <div class="flex gap-4 items-start">
+                    <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center shrink-0 mt-1">
+                        <i class="fas fa-chart-line text-primary"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold mb-2">灌溉记录</h4>
+                        <p class="text-gray-600 text-sm">自动记录灌溉时长、用水量，生成数据报表</p>
+                    </div>
+                </div>
+                <div class="flex gap-4 items-start">
+                    <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center shrink-0 mt-1">
+                        <i class="fas fa-exclamation-triangle text-primary"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold mb-2">异常告警</h4>
+                        <p class="text-gray-600 text-sm">设备故障/水管漏水实时提醒，避免水资源浪费</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- 核心优势（极简版） -->
-<section class="section-padding bg-neutral">
+<!-- 核心优势（统一布局） -->
+<section id="advantage" class="section-padding bg-neutral">
     <div class="container mx-auto px-4">
-        <div class="text-center max-w-2xl mx-auto mb-12">
-            <h2 class="text-[clamp(1.5rem,4vw,2.5rem)] font-bold mb-4">为什么选择智能灌溉</h2>
+        <div class="text-center max-w-3xl mx-auto mb-16">
+            <h2 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold mb-4">核心优势</h2>
+            <p class="text-gray-600 text-lg">
+                相比传统灌溉，智能灌溉更智能、更高效、更经济
+            </p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <!-- 优势1 -->
-            <div class="bg-white rounded-xl shadow-md p-6 card-hover flex items-center gap-4">
-                <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-clock text-primary text-xl"></i>
+            <div class="bg-white rounded-xl shadow-md overflow-hidden card-hover">
+                <div class="h-48 bg-primary/20 flex items-center justify-center">
+                    <i class="fas fa-clock text-primary text-6xl"></i>
                 </div>
-                <div>
-                    <h3 class="text-lg font-bold mb-1">节省人工</h3>
-                    <p class="text-gray-600 text-sm">
-                        无需专人值守开关灌溉设备，降低人力成本
+                <div class="p-8">
+                    <h3 class="text-xl font-bold mb-3">节省人工</h3>
+                    <p class="text-gray-600">
+                        无需专人值守开关灌溉设备，一人可管理百亩农田，人力成本降低80%
                     </p>
                 </div>
             </div>
 
             <!-- 优势2 -->
-            <div class="bg-white rounded-xl shadow-md p-6 card-hover flex items-center gap-4">
-                <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-water text-primary text-xl"></i>
+            <div class="bg-white rounded-xl shadow-md overflow-hidden card-hover">
+                <div class="h-48 bg-primary/20 flex items-center justify-center">
+                    <i class="fas fa-water text-primary text-6xl"></i>
                 </div>
-                <div>
-                    <h3 class="text-lg font-bold mb-1">精准控水</h3>
-                    <p class="text-gray-600 text-sm">
-                        按作物需求供水，提升作物生长质量
+                <div class="p-8">
+                    <h3 class="text-xl font-bold mb-3">精准控水</h3>
+                    <p class="text-gray-600">
+                        按作物生长周期与土壤墒情精准供水，提升作物品质与产量
+                    </p>
+                </div>
+            </div>
+
+            <!-- 优势3 -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden card-hover">
+                <div class="h-48 bg-primary/20 flex items-center justify-center">
+                    <i class="fas fa-coins text-primary text-6xl"></i>
+                </div>
+                <div class="p-8">
+                    <h3 class="text-xl font-bold mb-3">降低成本</h3>
+                    <p class="text-gray-600">
+                        节水30%+节电20%，综合运营成本降低40%以上
                     </p>
                 </div>
             </div>
@@ -169,19 +226,56 @@
     </div>
 </section>
 
-<!-- 行动召唤（精简版） -->
-<section class="py-16 bg-gradient-to-r from-primary to-secondary text-white">
-    <div class="container mx-auto px-4 text-center">
-        <h2 class="text-[clamp(1.5rem,4vw,2.5rem)] font-bold mb-4">开启智能灌溉新模式</h2>
-        <p class="text-lg mb-6 max-w-xl mx-auto opacity-90">
-            省心、省水、省人工，让灌溉更智能
-        </p>
-        <a href="#" class="px-8 py-4 rounded-lg bg-white text-primary font-bold hover:bg-gray-100 transition-colors inline-block">
-            免费试用15天
-        </a>
+<!-- 应用场景 -->
+<section id="scenarios" class="section-padding bg-white">
+    <div class="container mx-auto px-4">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+            <h2 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold mb-4">广泛的应用场景</h2>
+            <p class="text-gray-600 text-lg">
+                适配各类农业种植场景，满足不同灌溉需求
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="flex gap-6 items-center bg-neutral rounded-xl p-6 card-hover">
+                <img src="https://picsum.photos/id/118/200/150" alt="大棚种植" class="w-40 h-40 object-cover rounded-lg shrink-0">
+                <div>
+                    <h3 class="text-xl font-bold mb-2">大棚种植</h3>
+                    <p class="text-gray-600">
+                        精准控制棚内湿度，适配蔬菜、水果等经济作物精细化灌溉需求
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex gap-6 items-center bg-neutral rounded-xl p-6 card-hover">
+                <img src="https://picsum.photos/id/122/200/150" alt="大田种植" class="w-40 h-40 object-cover rounded-lg shrink-0">
+                <div>
+                    <h3 class="text-xl font-bold mb-2">大田种植</h3>
+                    <p class="text-gray-600">
+                        大面积农田批量灌溉，支持分区、分时段精准控水
+                    </p>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 
+<!-- 行动召唤（统一样式） -->
+<section class="py-20 bg-gradient-to-r from-primary to-secondary text-white">
+    <div class="container mx-auto px-4 text-center">
+        <h2 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold mb-6">开启智能灌溉新模式</h2>
+        <p class="text-xl mb-8 max-w-2xl mx-auto opacity-90">
+            省心、省水、省人工，让灌溉更智能，让种植更轻松
+        </p>
+        <div class="flex flex-wrap justify-center gap-4">
+            <a href="#" class="px-8 py-4 rounded-lg bg-white text-primary font-bold hover:bg-gray-100 transition-colors">
+                立即试用
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- 页脚（与其他页面完全一致） -->
 <footer class="bg-dark text-gray-400 py-12">
     <div class="container mx-auto px-4">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
@@ -191,7 +285,7 @@
                     Agri Platform
                 </h3>
                 <p class="mb-4">
-                    省心、省水、省人工，让灌溉更智能
+                    用科技赋能农业，让种植更简单、更高效
                 </p>
                 <div class="flex gap-4">
                     <a href="#" class="text-gray-400 hover:text-primary transition-colors">
@@ -209,14 +303,16 @@
             <div>
                 <h4 class="text-white font-bold mb-4">功能导航</h4>
                 <ul class="space-y-2">
-                    <li><a href="#" class="hover:text-primary transition-colors">地块管理</a></li>
                     <li><a href="#" class="hover:text-primary transition-colors">环境监测</a></li>
                     <li><a href="#" class="hover:text-primary transition-colors">智能灌溉</a></li>
                     <li><a href="#" class="hover:text-primary transition-colors">数据分析</a></li>
+                    <li><a href="#" class="hover:text-primary transition-colors">病虫害预警</a></li>
+                    <li><a href="#" class="hover:text-primary transition-colors">地块管理</a></li>
+                    <li><a href="#" class="hover:text-primary transition-colors">PC管理</a></li>
                 </ul>
             </div>
 
-            <div>
+            <div id="about-us">
                 <h4 class="text-white font-bold mb-4">关于我们</h4>
                 <ul class="space-y-2">
                     <li><a href="#" class="hover:text-primary transition-colors">公司介绍</a></li>
@@ -251,12 +347,12 @@
     </div>
 </footer>
 
-<!-- 回到顶部按钮 -->
+<!-- 回到顶部按钮（与其他页面一致） -->
 <button id="backToTop" class="fixed bottom-8 right-8 w-12 h-12 bg-primary text-white rounded-full shadow-lg flex items-center justify-center opacity-0 invisible transition-all duration-300 hover:bg-secondary">
     <i class="fas fa-arrow-up"></i>
 </button>
 
-<!-- JavaScript（仅保留核心交互） -->
+<!-- JavaScript（统一交互逻辑） -->
 <script>
     // 回到顶部功能
     const backToTopBtn = document.getElementById('backToTop');
@@ -275,6 +371,23 @@
         window.scrollTo({
             top: 0,
             behavior: 'smooth'
+        });
+    });
+
+    // 平滑滚动
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            const targetId = this.getAttribute('href');
+            if (targetId === '#') return;
+
+            const targetElement = document.querySelector(targetId);
+            if (targetElement) {
+                targetElement.scrollIntoView({
+                    behavior: 'smooth'
+                });
+            }
         });
     });
 </script>
