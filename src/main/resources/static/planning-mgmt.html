@@ -1953,10 +1953,6 @@ body.iframe-embedded .mt-32 {
 
         // DOMContentLoaded事件监听器 - 页面加载完成后执行
         document.addEventListener('DOMContentLoaded', function () {
-            console.log('页面DOM加载完成');
-
-            // 1. 优先初始化导航功能 - 最关键的功能
-            console.log('开始初始化导航功能...');
 
             const navLinks = document.querySelectorAll('aside nav a');
             const sections = document.querySelectorAll('main section');
@@ -2003,11 +1999,6 @@ body.iframe-embedded .mt-32 {
                     targetSection.classList.remove('section-hidden');
                 });
             });
-
-            console.log('导航功能初始化完成');
-
-            // 2. 初始化表格按钮事件
-            console.log('开始初始化表格按钮事件...');
             try {
                 // 种植计划表格按钮事件
                 const planTableBody = document.getElementById('plan-table-body');
@@ -2016,12 +2007,9 @@ body.iframe-embedded .mt-32 {
                         const target = e.target;
                         if (target.tagName === 'BUTTON') {
                             const action = target.textContent.trim();
-                            console.log('表格按钮点击:', action);
-                            // 这里可以添加具体的按钮处理逻辑
                         }
                     });
                 }
-                console.log('表格按钮事件初始化完成');
             } catch (bindError) {
                 console.error('绑定表格按钮事件失败:', bindError);
             }
@@ -2040,12 +2028,8 @@ body.iframe-embedded .mt-32 {
                     return `${Math.floor(diffSeconds / 3600)}小时前更新`;
                 }
             }
-
-            // 3. 加载数据
-            console.log('开始加载数据...');
             loadPestWarnings(); // 加载病虫害预警
             refreshHandleRecordsTable(); // 加载处理记录
-            console.log('数据加载完成');
 
 
             // 格式化时间函数 - 返回具体时间（如"2024-05-20 14:32:15"）
@@ -2060,9 +2044,6 @@ body.iframe-embedded .mt-32 {
                 });
             }
 
-
-            // 4. 开始模拟实时数据更新
-            console.log('开始模拟实时数据更新...');
             try {
                 setInterval(function () {
                     try {
@@ -2087,21 +2068,15 @@ body.iframe-embedded .mt-32 {
                         console.error('更新实时数据失败:', updateError);
                     }
                 }, 5000);
-                console.log('实时数据更新已启动');
             } catch (intervalError) {
                 console.error('设置实时数据更新失败:', intervalError);
             }
-
-            // 5. 初始化处理记录表格
-            console.log('开始初始化处理记录表格...');
             try {
                 // refreshHandleRecordsTable();
                 console.log('处理记录表格初始化完成');
             } catch (refreshError) {
                 console.error('初始化处理记录表格失败:', refreshError);
             }
-
-            console.log('所有功能初始化完成');
         });
 
         /* 头像下拉功能（直接搬过来） */
